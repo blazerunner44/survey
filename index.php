@@ -1,5 +1,5 @@
-<?php require_once( '../admin/cms.php' ); require('mysql.php');?>
-<cms:template title='Survey' order='10' />
+<?php require('mysql.php');?>
+
 <!doctype html>
 
 <html>
@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<title>Survey | High Desert Homes</title>
+<title>Survey</title>
 
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 
@@ -87,105 +87,8 @@ $(document).ready(function(){
 <body>
 
 	<div class="container">
-
-    	<div id="stepOne">
-
-        <?php $result=mysqli_query($con, "SELECT ip FROM takers WHERE ip='$_SERVER[REMOTE_ADDR]'");
-        $count=0;
-        while($row=mysqli_fetch_array($result)){
-          $count++;
-        }
-        if ($count >= 5){
-          echo "<h2>You have taken the survey too many times.<h2>";
-          exit;
-        }
-        ?>
-
-            <form id="userInformation">
-            
-            <cms:editable name='welcome_text' desc="First text the visitor sees" type='richtext'>
-              <h1>Your Information</h1>
-            </cms:editable>
-              <div class="form-group col-sm-6">
-
-                <label for="firstName">First Name</label>
-
-                <input type="text" required name="firstName" class="form-control" id="firstName" placeholder="First Name"/>
-
-              </div>
-
-              
-
-              <div class="form-group col-sm-6">
-
-                <label for="lastName">Last Name</label>
-
-                <input type="text" class="form-control" required id="lastName" name="lastName" placeholder="Last Name"/>
-
-              </div>
-
-              
-
-              <div class="form-group col-sm-6">
-
-                <label for="houseNumber">House Number</label>
-
-                <input type="text" class="form-control" id="houseNumber"  name="houseNumber" required placeholder="ex. 2357" />
-
-              </div>
-
-              
-
-              <div class="form-group col-sm-6">
-
-                <label for="houseStreet">Street</label>
-
-                <input type="text" class="form-control" id="houseStreet" name="houseStreet" required placeholder="ex. 2350 East or Bumblebee Lane" />
-
-              </div>
-
-              
-
-              <div class="form-group col-sm-6">
-
-                <label for="houseCity">City</label>
-
-                <input type="text" class="form-control" id="houseCity" name="houseCity" required placeholder="ex. Saint George" />
-
-              </div>
-
-              
-
-              <div class="form-group col-sm-6">
-
-                <label for="houseZip">ZIP Code</label>
-
-                <input type="text" class="form-control" id="houseZip" name="houseZip" required placeholder="ex. 84790" />
-
-              </div>
-
-             
-
-             <div class="form-group col-sm-12">
-
-                  <button type="submit" id="submit" data-loading-text="Checking..." class="btn btn-default" autocomplete="off">
-
-                  Continue >>
-
-                </button>
-
-             </div>
-
-            </form>
-
-        </div>
-
-        
-
-        <div id="stepTwo" style="display:none">
-          <cms:editable name='question_text' desc="Text visitor sees when viewing questions" type='richtext'>
+        <div id="stepTwo">
           	<h1>Questions</h1>
-          </cms:editable>
 
         	<form>
 
@@ -278,11 +181,9 @@ $(document).ready(function(){
         
 
         <div id="stepThree" style="display:none">
-          <cms:editable name='thanks_text' desc="Text visitor sees after taking the survey." type='richtext'>
           	<h1>Thank you!</h1>
 
             <p>Thank you for taking the survey. Your responses have been recorded.</p>
-          </cms:editable>
 
             <hr>
 
@@ -293,4 +194,3 @@ $(document).ready(function(){
 </body>
 
 </html>
-<?php COUCH::invoke(); ?>

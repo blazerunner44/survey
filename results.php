@@ -1,21 +1,3 @@
-<?php require_once( '../admin/cms.php' ); ?>
-<cms:template title='Survey Results' order='101'/>
-<!-- in gallery.php -->
-
-<!--
-
-Template Created By Michal Dacko For Jaden Taylor
-This template makes use of the CDN version of bootstrap and the CDN version of JQuery
-The theming is the Sandstone theme from Bootswatch, also imported from a CDN.
-
-
-NOTES FOR SERVER SIDE CODE:
-The progress bars display percentages.
-The areas that need changed when setting new values are shown in in the code with the use of comments.
-
-
--->
-
 <?php 
 require('mysql.php');
 ?>
