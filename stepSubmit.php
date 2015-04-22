@@ -8,7 +8,7 @@ if($_GET['step'] == 1){
 	$name = $_POST['firstName'] . " ". $_POST['lastName'];
 	$rand = substr(md5(rand()), 0, 10);
 
-	mysqli_query($con, "INSERT INTO takers (ip,name,houseNumber,houseStreet,houseCity,houseZip,session_token) VALUES ('$_SERVER[REMOTE_ADDR]','$name','$_POST[houseNumber]','$_POST[houseStreet]','$_POST[houseCity]','$_POST[houseZip])','$rand')");
+	mysqli_query($con, "INSERT INTO takers (ip,name,session_token) VALUES ('$_SERVER[REMOTE_ADDR]','$name','$rand')");
 
 	echo "<script>var session_token='{$rand}';</script>";
 }elseif($_GET['step'] == 2){

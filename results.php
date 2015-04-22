@@ -4,11 +4,11 @@ require('mysql.php');
 
 <html>
 	<head>
-		<script src="../js/jquery.min.js"></script>
-		<script src="../bootstrap/js/bootstrap.min.js"></script>
+		<script src="includes/jquery.min.js"></script>
+		<script src="includes/bootstrap.min.js"></script>
 		<title>Survey Results</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="styles/bootstrap/bootstrap.min.css">
 		<link rel="stylesheet" href="http://bootswatch.com/sandstone/bootstrap.min.css">
 		<style>
 		/* Bellow is the styling for the title of the page. This is not required...*/
@@ -214,4 +214,3 @@ require('mysql.php');
 		</script>
 	</body>
 </html>
-<?php COUCH::invoke(); ?>

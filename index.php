@@ -12,15 +12,15 @@
 
 <title>Survey</title>
 
-<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="includes/jquery.min.js"></script>
 
-<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="includes/bootstrap.min.js"></script>
 
 
 
-<link href="../styles/survey.css" rel="stylesheet" type="text/css">
+<link href="styles/survey.css" rel="stylesheet" type="text/css">
 
-<link href="../styles/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="styles/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript">
     jQuery(document).ready(function () {
@@ -87,7 +87,54 @@ $(document).ready(function(){
 <body>
 
 	<div class="container">
-        <div id="stepTwo">
+    <div id="stepOne">
+
+        <?php $result=mysqli_query($con, "SELECT ip FROM takers WHERE ip='$_SERVER[REMOTE_ADDR]'");
+        $count=0;
+        while($row=mysqli_fetch_array($result)){
+          $count++;
+        }
+        if ($count >= 5){
+          echo "<h2>You have taken the survey too many times.<h2>";
+          exit;
+        }
+        ?>
+
+            <form id="userInformation">
+            
+            <cms:editable name='welcome_text' desc="First text the visitor sees" type='richtext'>
+              <h1>Your Information</h1>
+            </cms:editable>
+              <div class="form-group col-sm-6">
+
+                <label for="firstName">First Name</label>
+
+                <input type="text" required name="firstName" class="form-control" id="firstName" placeholder="First Name"/>
+
+              </div>
+
+              <div class="form-group col-sm-6">
+
+                <label for="lastName">Last Name</label>
+
+                <input type="text" class="form-control" required id="lastName" name="lastName" placeholder="Last Name"/>
+
+              </div>
+
+             <div class="form-group col-sm-12">
+
+                  <button type="submit" id="submit" data-loading-text="Checking..." class="btn btn-default" autocomplete="off">
+
+                  Continue >>
+
+                </button>
+
+             </div>
+
+            </form>
+
+        </div>
+        <div id="stepTwo" style="display:none">
           	<h1>Questions</h1>
 
         	<form>
