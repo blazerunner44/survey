@@ -47,24 +47,6 @@ require('mysql.php');
 							<h1 class="title">Survey Results</h1>
 							<!-- Single button -->
 							
-							<div class="btn-group">
-							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style='margin:-20px 0 10px 0'>
-							    <?php if(isset($_GET['houseStreet'])){echo $_GET['houseStreet'] . " <span class='caret'></span>";}else{ echo "Filter by Street <span class='caret'></span>";}?>
-							  </button>
-							  <ul class="dropdown-menu" role="menu">
-							  	<?php $query=mysqli_query($con, "SELECT id,houseStreet FROM takers");
-							  	$result_array=array();
-								while($row=mysqli_fetch_array($query)){
-									if (!array_key_exists($row['houseStreet'], $result_array)) {
-											$result_array[$row['houseStreet']] = 1;
-											echo " <li><a href='?houseStreet={$row[houseStreet]}'>{$row[houseStreet]}</a></li>";
-										}
-								   
-								 } ?>
-								 <li class="divider"></li>
-								 <li><a href="?">All Streets</a></li>
-							  </ul>
-							</div>
 						</div>
 
 					<?php
