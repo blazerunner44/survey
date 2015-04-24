@@ -37,6 +37,75 @@ require('mysql.php');
 		<link type="text/css" rel="stylesheet" href="new_button/css/normalize.css" />
 		<link type="text/css" rel="stylesheet" href="new_button/css/style.css" />
 
+		<script>
+		//
+		//Make the questions uncollapsed when the page is loaded.
+		//
+		$(document).ready(function(){
+			$(".collapse").collapse("show");
+			$(".collapse").click(function(){
+				$(this).collapse('toggle');
+			});
+
+			$('.remove').click(function(){
+				if(confirm("Are you sure you want to delete this question? All responses will be deleted as well!")){
+					$(this).parent().parent().parent().slideUp();
+					$.post('remove_question.php', {id:$(this).attr('id')}, function(data){
+
+					});
+				}
+			});
+			$("#add_question_plus").click(function(){
+				$('#new_question').slideToggle();
+			});
+
+			$('#new_choice').click(function(){
+				$('#choices').append('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
+			});
+
+			$('#new_submit').click(function(){
+				$.post('create_question.php', $('form').serialize(), function(data){
+					alert(data);
+					location.reload();
+				});
+				
+			});
+		});
+		</script>
+
+		<script>
+		$(document).ready(function(){
+			var choices = $("#choices");
+			var sliderChoices = $("#sliderChoices");
+
+			$("#choices").detach();
+			$("#sliderChoices").detach();
+
+		$( "select" )
+		  .change(function () {
+		    var str = "";
+		    if ($("select option:selected").hasClass('nochoice')){
+		    	$("#choices").detach();
+		    }else if ($("select option:selected").hasClass('slider')){
+		    	$("#allChoices").append(sliderChoices);
+		    	$("#choices").detach();
+		    }else if ($("select option:selected").hasClass('choices')){
+		    	$("#sliderChoices").detach();
+		    	$("#allChoices").append(choices);
+		    }
+		    // $( "select option:selected" ).each(function() {
+		    //   str = $( this ).text();
+		    // if (str == "Yes or No"){
+		    // 	$("#choices").remove();
+		    // }else if (str == "Slider"){
+		    // 	$("#sliderChoices").show();
+		    // 	$("#choices").remove();
+		    // }
+		// });
+		  })
+		  .change();
+		});
+		</script>
 	</head>
 	<body>
 		<div class="containter-fluid">
@@ -133,18 +202,32 @@ require('mysql.php');
 									      			<div class="form-group">
 										      			<select class="form-control" name="type">
 										      				<option disabled selected="selected">Question Type</option>
-										      				<option>Yes or No</option>
-										      				<option>Multiple Choice</option>
-										      				<option>Multiple Choice (expanded)</option>
+										      				<option id="yn" class="nochoice">Yes or No</option>
+										      				<option class='nochoice'>Text Box</option>
+										      				<option class='nochoice'>Paragraph</option>
+										      				<option class='choices'>Multiple Choice</option>
+										      				<option class='choices'>Multiple Choice (expanded)</option>
+										      				<option class="slider">Slider</option>
 										      			</select>
 										      		</div>
-										      		<hr><h4>Choices</h4>
+										      		<div id="allChoices">
 										      		<div id="choices">
+										      			<h4>Choices</h4>
 											      		<div class="form-group">
 											      			<input type="text" name="choices[]" class="form-control" placeholder='Enter a Choice' />
 										      			</div>
+										      		
+										      			<span id='new_choice' class='add-new'></span> Add New Choice<br><br>
 										      		</div>
-										      		<span id='new_choice' class='add-new'></span> Add New Choice<br><br>
+
+										      		<div id="sliderChoices">
+										      			<h4>Slider Values</h4>
+										      			<div class="form-group">
+											      			<input type="number" name="choices[]" class="form-control" placeholder='Min Value' />
+											      			<input type="number" name="choices[]" class="form-control" placeholder='Max Value' />
+										      			</div>
+										      		</div>
+										      		</div>
 									      			<button type="button" class="btn btn-primary" id="new_submit">Add Question</button>
 									      		</form>
 								      		</div>
@@ -159,40 +242,6 @@ require('mysql.php');
 		</div>
 
 		
-		<script>
-		//
-		//Make the questions uncollapsed when the page is loaded.
-		//
-		$(document).ready(function(){
-			$(".collapse").collapse("show");
-			$(".collapse").click(function(){
-				$(this).collapse('toggle');
-			});
-
-			$('.remove').click(function(){
-				if(confirm("Are you sure you want to delete this question? All responses will be deleted as well!")){
-					$(this).parent().parent().parent().slideUp();
-					$.post('remove_question.php', {id:$(this).attr('id')}, function(data){
-
-					});
-				}
-			});
-			$("#add_question_plus").click(function(){
-				$('#new_question').slideToggle();
-			});
-
-			$('#new_choice').click(function(){
-				$('#choices').append('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
-			});
-
-			$('#new_submit').click(function(){
-				$.post('create_question.php', $('form').serialize(), function(data){
-					alert(data);
-					location.reload();
-				});
-				
-			});
-		});
-		</script>
+		
 	</body>
 </html>
