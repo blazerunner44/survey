@@ -21,6 +21,10 @@
 <link href="styles/survey.css" rel="stylesheet" type="text/css">
 
 <link href="styles/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
+<script src="slider/jquery-ui.min.js"></script>
+<link href="slider/jquery-ui.min.css" rel="stylesheet" type="text/css">
+<script src="slider/jquery-ui-slider-pips.js"></script>
+<link href="slider/jquery-ui-slider-pips.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript">
     jQuery(document).ready(function () {
@@ -89,15 +93,15 @@ $(document).ready(function(){
 	<div class="container">
     <div id="stepOne">
 
-        <?php $result=mysqli_query($con, "SELECT ip FROM takers WHERE ip='$_SERVER[REMOTE_ADDR]'");
-        $count=0;
-        while($row=mysqli_fetch_array($result)){
-          $count++;
-        }
-        if ($count >= 5){
-          echo "<h2>You have taken the survey too many times.<h2>";
-          exit;
-        }
+        <?php //$result=mysqli_query($con, "SELECT ip FROM takers WHERE ip='$_SERVER[REMOTE_ADDR]'");
+        // $count=0;
+        // while($row=mysqli_fetch_array($result)){
+        //   $count++;
+        // }
+        // if ($count >= 5){
+        //   echo "<h2>You have taken the survey too many times.<h2>";
+        //   exit;
+        // }
         ?>
 
             <form id="userInformation">
@@ -153,7 +157,16 @@ $(document).ready(function(){
 
                               <label for='{$row[id]}'><h4>{$row[question]}<small> {$row[description]}</small></h4></label>
 
-                              <input type='text' class='form-control' name='{$row[id]}' required placeholder='Text response' />
+                              <input type='text' class='form-control' name='{$row[id]}' required placeholder='Enter response' />
+
+                          </div>";
+                          break;
+                  case 'paragraph':
+                    echo "<div class='form-group col-sm-12'>
+
+                              <label for='{$row[id]}'><h4>{$row[question]}<small> {$row[description]}</small></h4></label>
+
+                              <textarea class='form-control' rows='5' maxlength='5000' name='{$row[id]}' required></textarea>
 
                           </div>";
                           break;
@@ -204,6 +217,25 @@ $(document).ready(function(){
                         <textarea rows='5' class='form-control' name='{$row[id]}'></textarea>
 
                     </div>";
+                    break;
+                  case 'slider':
+                    echo "<script>
+                      $(document).ready(function(){
+                      $('#{$row[id]}slider')
+                          .slider({
+                              min: {$choices[0]},
+                              max: {$choices[1]},
+                              change: function(event, ui) {
+                                $('#{$row[id]}').attr('value', ui.value);
+                              }
+                          })
+                          .slider('pips', {
+                              rest: 'label'
+                          })
+                      });
+                      </script>";
+                    echo "<div class='form-group col-sm-12'><label><h4>{$row[question]} <small>{$row[description]}</small></h4></label><div id='{$row[id]}slider'></div></div>";
+                    echo "<input type='hidden' name='{$row[id]}' id='{$row[id]}'/>";
                     break;
                   default:
                     echo "<h5>unknown question type</h5>";
