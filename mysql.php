@@ -1,3 +1,1 @@
-<?php
-$con=mysqli_connect("localhost","eterna33_root","6bqwus6ehq","eterna33_hdh");
-?>
+<?php $con = mysqli_connect('localhost','admin_survey','survey','admin_survey'); ?>

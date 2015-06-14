@@ -1,9 +1,41 @@
 <?php
 if($_POST['submit']){
 	$myfile = fopen("mysql.php", "w") or die("Unable to open file!");
-	$info = "$host = '{$_POST[host]}'; $user='$_POST[user]'; $pass='$_POST[password]'; $dbName='$_POST[dbName]';";
-	fwrite($myfile, $info);
-	fclose($myfile);
+	$txt = "<?php \$con = mysqli_connect('{$_POST[host]}','{$_POST[user]}','{$_POST[password]}','{$_POST[dbName]}'); ?>";
+	fwrite($myfile, $txt);
+
+	require('config/mysql.php');
+
+	//Create QUESTIONS table
+	$query="CREATE TABLE questions (
+	id INT(11) AUTO_INCREMENT PRIMARY KEY,
+	question VARCHAR(500) NOT NULL,
+	type VARCHAR(500) NOT NULL,
+	description VARCHAR(500),
+	choices VARCHAR(2000)
+	)";
+	mysqli_query($con, $query) or die(mysqli_error($con));
+
+	//Create RESULTS table
+	$query="CREATE TABLE results (
+	id INT(11) AUTO_INCREMENT PRIMARY KEY,
+	question_id INT(10) NOT NULL,
+	response VARCHAR(5000) NOT NULL,
+	session_token VARCHAR(10)
+	)";
+	mysqli_query($con, $query) or die(mysqli_error($con));
+
+	//Create TAKERS table
+	$query="CREATE TABLE takers (
+	id INT(11) AUTO_INCREMENT PRIMARY KEY,
+	ip VARCHAR(20) NOT NULL,
+	session_token VARCHAR(10) NOT NULL,
+	name VARCHAR(100),
+	complete TINYINT(1)
+	)";
+	mysqli_query($con, $query) or die(mysqli_error($con));
+
+	header('Location: results.php');
 }
 ?>
 <html>
@@ -15,6 +47,7 @@ if($_POST['submit']){
 
 <body>
 	<div class="container">
+	<h1>Install PHP Survey</h1>
 	<form method="post" action="install.php">
 		<div class="row">
 			<div class="form-group col-sm-6">
@@ -30,7 +63,7 @@ if($_POST['submit']){
 			<div class="col-sm-6">
 				<div class="form-group">
 				    <label for="host">Database Host</label>
-				    <input type="text" class="form-control" id="host" name="host" placeholder="Enter the database host address">
+				    <input type="text" class="form-control" id="host" name="host" value="localhost" placeholder="Enter the database host address">
 				</div>
 			</div>
 			<div class="col-sm-6">
