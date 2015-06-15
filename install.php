@@ -4,7 +4,7 @@ if($_POST['submit']){
 	$txt = "<?php \$con = mysqli_connect('{$_POST[host]}','{$_POST[user]}','{$_POST[password]}','{$_POST[dbName]}'); ?>";
 	fwrite($myfile, $txt);
 
-	require('config/mysql.php');
+	require('mysql.php');
 
 	//Create QUESTIONS table
 	$query="CREATE TABLE questions (
@@ -14,7 +14,7 @@ if($_POST['submit']){
 	description VARCHAR(500),
 	choices VARCHAR(2000)
 	)";
-	mysqli_query($con, $query) or die(mysqli_error($con));
+	mysqli_query($con, $query);
 
 	//Create RESULTS table
 	$query="CREATE TABLE results (
@@ -23,7 +23,7 @@ if($_POST['submit']){
 	response VARCHAR(5000) NOT NULL,
 	session_token VARCHAR(10)
 	)";
-	mysqli_query($con, $query) or die(mysqli_error($con));
+	mysqli_query($con, $query);
 
 	//Create TAKERS table
 	$query="CREATE TABLE takers (
@@ -33,7 +33,7 @@ if($_POST['submit']){
 	name VARCHAR(100),
 	complete TINYINT(1)
 	)";
-	mysqli_query($con, $query) or die(mysqli_error($con));
+	mysqli_query($con, $query);
 
 	header('Location: results.php');
 }

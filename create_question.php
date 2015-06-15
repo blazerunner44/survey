@@ -28,5 +28,5 @@ $choices=json_encode($_POST['choices']);
 }
 
 
-mysqli_query($con, "INSERT INTO questions (question,type,description,choices) VALUES ('".mysqli_escape_string($_POST[name])."','$type', '".mysqli_escape_string($_POST[description])."','".mysqli_escape_string($choices)."')") or die(mysqli_error($con));
+mysqli_query($con, "INSERT INTO questions (question,type,description,choices) VALUES ('".mysqli_escape_string($con,$_POST[name])."','$type', '".mysqli_escape_string($_POST[description])."','".mysqli_escape_string($choices)."')") or die(mysqli_error($con));
 ?>

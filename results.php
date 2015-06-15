@@ -136,9 +136,9 @@ require('mysql.php');
 									<?php
 									//Calculate % for each question
 									if (isset($_GET['houseStreet'])){
-										$results = mysqli_query($con, "SELECT results.* FROM results WHERE question_id='".mysqli_escape_string($row[id])."' AND results.session_token in ( select takers.session_token from takers where takers.houseStreet='".mysqli_escape_string($_GET[houseStreet])."') ORDER BY id ASC");
+										$results = mysqli_query($con, "SELECT results.* FROM results WHERE question_id='".mysqli_escape_string($con,$row[id])."' AND results.session_token in ( select takers.session_token from takers where takers.houseStreet='".mysqli_escape_string($con,$_GET[houseStreet])."') ORDER BY id ASC");
 									}else {
-										$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='".mysqli_escape_string($row[id])."'");
+										$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='".mysqli_escape_string($con,$row[id])."'");
 									}
 									
 									$result_array = array();

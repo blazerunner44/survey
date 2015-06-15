@@ -1,1 +1,1 @@
-
+<?php $con = mysqli_connect('localhost','admin_survey','survey','admin_survey'); ?>
