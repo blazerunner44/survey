@@ -1,21 +1,56 @@
 <?php 
-require('mysql.php');
+// ini_set('display_errors',1);
+// ini_set('display_startup_errors',1);
+// error_reporting(-1); 
+require('class.php');
+require_once('mysql.php');
+$survey = new Survey();
+
+function fullType($input){
+	switch($input){
+		case 'yn':
+		 	$type = 'Yes or No';
+			break;
+		case 'option':
+			$type = "Multiple Choice";
+			break;
+		case 'expanded_option':
+			$type = 'Multiple Choice (expanded)';
+			break;
+		case 'slider':
+			$type = 'Slider';
+			break;
+		case 'text':
+			$type = 'Text Box';
+			break;
+		case 'paragraph':
+			$type = 'Paragraph';
+			break;
+		default:
+			$type='unknown question type';
+	}
+	return $type;
+}
 ?>
 
 <html>
 	<head>
 		<script src="includes/jquery.min.js"></script>
-		<script src="includes/bootstrap.min.js"></script>
+		<script src="bootstrap/js/bootstrap.min.js"></script>
 		<title>Survey Results</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<link rel="stylesheet" href="styles/bootstrap/bootstrap.min.css">
-		<link rel="stylesheet" href="http://bootswatch.com/sandstone/bootstrap.min.css">
+		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="http://bootswatch.com/yeti/bootstrap.min.css">
+		<!-- <link rel="stylesheet" href="https://bootswatch.com/sandstone/bootstrap.min.css"> -->
 		<style>
 		/* Bellow is the styling for the title of the page. This is not required...*/
 		.title{
 			font-weight: bolder;
 			font-size: 500%;
 			margin-bottom: 30px;
+		}
+		.containter-fluid{
+			margin-top:20px;
 		}
 		span {
 			font-size: 18px;
@@ -29,6 +64,9 @@ require('mysql.php');
 		#new_question{
 			display:none;
 		}
+		.questionOption{
+			margin-bottom:10px;
+		}
 		</style>
 
 		<!-- Styles for "NEW" button -->
@@ -37,44 +75,8 @@ require('mysql.php');
 		<link type="text/css" rel="stylesheet" href="new_button/css/normalize.css" />
 		<link type="text/css" rel="stylesheet" href="new_button/css/style.css" />
 
-		<script>
-		//
-		//Make the questions uncollapsed when the page is loaded.
-		//
-		$(document).ready(function(){
-			$(".collapse").collapse("show");
-			$(".collapse").click(function(){
-				$(this).collapse('toggle');
-			});
-
-			$('.remove').click(function(){
-				if(confirm("Are you sure you want to delete this question? All responses will be deleted as well!")){
-					$(this).parent().parent().parent().slideUp();
-					$.post('remove_question.php', {id:$(this).attr('id')}, function(data){
-
-					});
-				}
-			});
-			$("#add_question_plus").click(function(){
-				$('#new_question').slideToggle();
-			});
-
-			$('#new_choice').click(function(){
-				$('#choices').append('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
-			});
-
-			$('#new_submit').click(function(){
-				$.post('create_question.php', $('form').serialize(), function(data){
-					alert(data);
-					location.reload();
-				});
-				
-			});
-		});
-		</script>
-
-		<script>
-		$(document).ready(function(){
+<script>
+$(document).ready(function(){
 			var choices = $("#choices");
 			var sliderChoices = $("#sliderChoices");
 
@@ -86,6 +88,7 @@ require('mysql.php');
 		    var str = "";
 		    if ($("select option:selected").hasClass('nochoice')){
 		    	$("#choices").detach();
+		    	$("#sliderChoices").detach();
 		    }else if ($("select option:selected").hasClass('slider')){
 		    	$("#allChoices").append(sliderChoices);
 		    	$("#choices").detach();
@@ -93,33 +96,98 @@ require('mysql.php');
 		    	$("#sliderChoices").detach();
 		    	$("#allChoices").append(choices);
 		    }
-		    // $( "select option:selected" ).each(function() {
-		    //   str = $( this ).text();
-		    // if (str == "Yes or No"){
-		    // 	$("#choices").remove();
-		    // }else if (str == "Slider"){
-		    // 	$("#sliderChoices").show();
-		    // 	$("#choices").remove();
-		    // }
-		// });
 		  })
 		  .change();
 		});
-		</script>
+</script>
+
+  <script>
+  $(document).ready(function() {
+    $( ".panel" ).each(function( index ) {
+	  $(this).find('.level').html(index+1);
+	});
+
+	$('.edit').click(function(){
+		var editId = this.id;
+		$.post('load_question.php', {"questionId": editId}, function(data){
+			$('#options').empty();
+			// alert(data);
+			data = JSON.parse(data);
+			// alert(data.options);
+			data.options = JSON.parse(data.options);
+			// alert(typeof(data.options));
+			// alert(data);
+			$('#questionName').val(data.name);
+			$('#questionDescription').val(data.description);
+			$('#myModalLabel').text(data.name);
+			$('#questionPos').val(data.pos);
+			$('#editQuestionId').val(data.id);
+			for (var i = 0; i < data.options.length; i++) {
+				$('#options').append('<input type="text" class="form-control questionOption" name="questionOption[]" value="' + data.options[i] +'">');
+			}
+			// $.each(data.options, function( i, l ){
+			//   $('#options').append('<input type="text" class="form-control" id="questionOption" name="questionOption[]" value="' + l +'">');
+			// });
+			// location.reload();
+		});
+		var updateQuestion = true;
+		$('#editQuestion').modal();
+	});
+
+	$('#saveEdit').click(function(){
+		$.post('save_question.php', $('#editQuestionForm').serialize(), function(data){
+			//alert(data);
+			location.reload();
+		});
+	});
+  });
+</script>
 	</head>
 	<body>
+		<!-- Modal -->
+<div class="modal fade" id="editQuestion" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+      <form id="editQuestionForm">
+      	<input type="hidden" name="questionId" id="editQuestionId" />
+		  <div class="form-group">
+		    <label for="questionName">Question Name</label>
+		    <input type="text" class="form-control" id="questionName" name="questionName">
+		  </div>
+		  <div class="form-group">
+		    <label for="questionDescription">Question Description</label>
+		    <input type="text" class="form-control" id="questionDescription" name="questionDescription">
+		  </div>
+		  <div class="form-group">
+		    <label for="questionPos">Question Position</label>
+		    <input type="text" class="form-control" id="questionPos" name="questionPos">
+		  </div>
+		  <div class="form-group">
+		    <label for="questionOption">Question Options</label>
+		    <div id="options"></div>
+		  </div>
+		</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" id="saveEdit" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+		<!-- Small modal -->
 		<div class="containter-fluid">
 			<div class="row">
 				<div class="col-xs-12 col-md-8 col-md-offset-2">
-					<div class="row panel panel-default">
-						<div class="col-xs-12 col-md-10 col-md-offset-1">
-							<h1 class="title">Survey Results</h1>
-							<!-- Single button -->
-							
-						</div>
-
+					<h1 class="col-md-offset-1"><?php echo $survey->name;?></h1>
 					<?php
-					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY id ASC");
+					require('mysql.php');
+					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
 					while($row = mysqli_fetch_array($question_query)){?>
 						<div class="col-xs-12 col-md-10 col-md-offset-1">
 							<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
@@ -127,19 +195,20 @@ require('mysql.php');
 							    	<div class="panel-heading" role="tab" id="headingOne">
 							      		<h4 class="panel-title">
 							        		<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href='<?php echo "#collapse{$row[id]}"; ?>' aria-expanded="false" aria-controls=<?php echo "collapse{$row[id]}"; ?>>
-							          			<span class="glyphicon glyphicon-chevron-down" aria-hidden="false">&nbsp;&nbsp; <?php echo "{$row[question]}"; ?></span>
+							          			<span class="glyphicon glyphicon-chevron-down" aria-hidden="false">&nbsp;&nbsp; <?php $type = fullType($row['type']); echo "{$row[question]} <small><i>{$type}</i></small>"; ?></span>
+							        			
 							        		</a>
+
 							        		<span class="glyphicon glyphicon-remove remove" style="float:right;" id='<?php echo "{$row[id]}"; ?>'></span>
+							        		<span class="glyphicon glyphicon-pencil edit" style="float:right;" id='<?php echo "{$row[id]}"; ?>'></span>
+							        		<span class="level" style="float:right">Rank</span>
 							      		</h4>
 							    	</div>
 									
 									<?php
 									//Calculate % for each question
-									if (isset($_GET['houseStreet'])){
-										$results = mysqli_query($con, "SELECT results.* FROM results WHERE question_id='".mysqli_escape_string($con,$row[id])."' AND results.session_token in ( select takers.session_token from takers where takers.houseStreet='".mysqli_escape_string($con,$_GET[houseStreet])."') ORDER BY id ASC");
-									}else {
-										$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='".mysqli_escape_string($con,$row[id])."'");
-									}
+									
+									$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='$row[id]'");
 									
 									$result_array = array();
 									$count=0;
@@ -161,20 +230,17 @@ require('mysql.php');
 							    		<?php if($count==0){echo "<div class='panel-body'><h3>No Responses Recorded</h3></div>";} ?>
 							    		<?php foreach($result_array as $response=>$number){?>
 							      		<div class="panel-body">
-							      			<h3><?php echo $response; ?></h3>
-							      			
+							      			<h3><?php echo stripslashes($response); ?></h3>
+							      			<?php if ($row['type'] != 'paragraph' and $row['type'] != 'text'){?>
+							      				
 							        		<div class="progress">
-							        		<!--
-
-							        		-->
-
 				  								<div class="progress-bar progress-bar-<?php if(strtolower($response) == "no"){echo "danger";}else{echo "success";}?> progress-bar-striped" role="progressbar" aria-valuenow='<?php echo ($number/$count)*100 ."%" ?>' aria-valuemin="0" aria-valuemax="100" style='width: <?php echo ($number/$count)*100 ."%" ?>'>
 				    								<?php echo round(($number/$count)*100) ."%  ({$number} votes)" ?>
 				  								</div>
 											</div>
+											<?php }?>
 										</div>
 										<?php } ?>
-										
 							    	</div>
 							    	
 							  	</div>
@@ -210,23 +276,24 @@ require('mysql.php');
 										      				<option class="slider">Slider</option>
 										      			</select>
 										      		</div>
+										      		<hr>
 										      		<div id="allChoices">
-										      		<div id="choices">
-										      			<h4>Choices</h4>
-											      		<div class="form-group">
-											      			<input type="text" name="choices[]" class="form-control" placeholder='Enter a Choice' />
-										      			</div>
-										      		
-										      			<span id='new_choice' class='add-new'></span> Add New Choice<br><br>
-										      		</div>
+											      		<div id="choices">
+											      			<h4>Choices</h4>
+												      		<div class="form-group">
+												      			<input type="text" name="choices[]" class="form-control" placeholder='Enter a Choice' />
+											      			</div>
+											      		
+											      			<span id='new_choice' class='add-new'></span> Add New Choice<br><br>
+											      		</div>
 
-										      		<div id="sliderChoices">
-										      			<h4>Slider Values</h4>
-										      			<div class="form-group">
-											      			<input type="number" name="choices[]" class="form-control" placeholder='Min Value' />
-											      			<input type="number" name="choices[]" class="form-control" placeholder='Max Value' />
-										      			</div>
-										      		</div>
+											      		<div id="sliderChoices">
+											      			<h4>Slider Values</h4>
+											      			<div class="form-group">
+												      			<input type="number" name="choices[]" class="form-control" placeholder='Min Value' />
+												      			<input type="number" name="choices[]" class="form-control" placeholder='Max Value' />
+											      			</div>
+											      		</div>
 										      		</div>
 									      			<button type="button" class="btn btn-primary" id="new_submit">Add Question</button>
 									      		</form>
@@ -242,6 +309,40 @@ require('mysql.php');
 		</div>
 
 		
-		
+		<script>
+		//
+		//Make the questions uncollapsed when the page is loaded.
+		//
+		$(document).ready(function(){
+			$(".collapse").collapse("show");
+			$(".collapse").click(function(){
+				$(this).collapse('toggle');
+			});
+
+			$('.remove').click(function(){
+				if(confirm("Are you sure you want to delete this question? All responses will be deleted as well!")){
+					$(this).parent().parent().parent().slideUp();
+					$.post('remove_question.php', {id:$(this).attr('id')}, function(data){
+
+					});
+				}
+			});
+			$("#add_question_plus").click(function(){
+				$('#new_question').slideToggle();
+			});
+
+			$('#new_choice').click(function(){
+				$('#choices').append('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
+			});
+
+			$('#new_submit').click(function(){
+				$.post('create_question.php', $('form').serialize(), function(data){
+					// alert(data);
+					location.reload();
+				});
+				
+			});
+		});
+		</script>
 	</body>
 </html>

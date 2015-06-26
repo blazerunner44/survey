@@ -12,7 +12,8 @@ if($_POST['submit']){
 	question VARCHAR(500) NOT NULL,
 	type VARCHAR(500) NOT NULL,
 	description VARCHAR(500),
-	choices VARCHAR(2000)
+	choices VARCHAR(2000),
+	pos INT(10) NOT NULL
 	)";
 	mysqli_query($con, $query);
 
@@ -26,14 +27,15 @@ if($_POST['submit']){
 	mysqli_query($con, $query);
 
 	//Create TAKERS table
-	$query="CREATE TABLE takers (
-	id INT(11) AUTO_INCREMENT PRIMARY KEY,
-	ip VARCHAR(20) NOT NULL,
-	session_token VARCHAR(10) NOT NULL,
-	name VARCHAR(100),
-	complete TINYINT(1)
+	$query="CREATE TABLE settings (
+	name VARCHAR(100) PRIMARY KEY NOT NULL,
+	value VARCHAR(100) NOT NULL
 	)";
 	mysqli_query($con, $query);
+
+	//Populate settings table
+	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('name', '$_POST[name]')");
+	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', '$_POST[email]')");
 
 	header('Location: results.php');
 }

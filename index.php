@@ -1,153 +1,111 @@
-<?php require('mysql.php');?>
+<?php
 
+// ini_set('display_errors',1);
+// ini_set('display_startup_errors',1);
+// error_reporting(-1); 
+?>
 <!doctype html>
-
 <html>
-
 <head>
+<?php
+require('class.php');
+require_once('mysql.php');
+$survey = new Survey();
+?>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?php echo $survey->name; ?></title>
+<meta name="description" content="We would love to hear your feedback!">
 
+<!-- Needed for slider -->
+<script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
+<script src="bootstrap/slider/jquery-ui.min.js"></script>
+<link href="bootstrap/slider/jquery-ui.min.css" rel="stylesheet" type="text/css">
+<script src="bootstrap/slider/jquery-ui-slider-pips.js"></script>
+<link href="bootstrap/slider/jquery-ui-slider-pips.css" rel="stylesheet" type="text/css">
 
-<title>Survey</title>
+<link rel="stylesheet" type="text/css" href="http://bootswatch.com/yeti/bootstrap.min.css">
 
-<script type="text/javascript" src="includes/jquery.min.js"></script>
-
-<script type="text/javascript" src="includes/bootstrap.min.js"></script>
-
-
-
-<link href="styles/survey.css" rel="stylesheet" type="text/css">
-
-<link href="styles/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
-<script src="slider/jquery-ui.min.js"></script>
-<link href="slider/jquery-ui.min.css" rel="stylesheet" type="text/css">
-<script src="slider/jquery-ui-slider-pips.js"></script>
-<link href="slider/jquery-ui-slider-pips.css" rel="stylesheet" type="text/css">
-
-<script type="text/javascript">
-    jQuery(document).ready(function () {
-        jQuery("button").click(function () {
-            var frame = $('iframe', window.parent.document);
-            var height = jQuery(".container").height();
-            frame.height(height + 15);
-        });
-    });
-</script>
-
-<script>
-function resize(){
-  var frame = $('iframe', window.parent.document);
-  var height = jQuery(".container").height();
-  frame.height(height + 15);
+<style type="text/css">
+/*#submit {
+	border: 0;
+	background-color: rgba(237,89,35,1.00);
+	color: #FFFFFF;
+	font-weight: bold;
+	width: 100px;
+	height: 40px;
+	margin-bottom: 20px;
+}*/
+label {
+	margin-top: 10px;
 }
-</script>
-
-<script>
-
-$(document).ready(function(){
-
-  $('#stepOne form').submit(function (e) {
-	  e.preventDefault();
-	  $('#stepOne #submit').button('loading');
-      $.post('stepSubmit.php?step=1', $('#stepOne form').serialize(), function(data){
-        $('head').append(data);
-        $('#stepOne').hide('slow');
-        $('#stepTwo').slideDown('slow', function(){
-          resize();
-        });
-	    });
-    });
-
-  
-
-   $('#stepTwo #submit').click(function (e) {
-
-	  e.preventDefault();
-
-	  $('#stepTwo #submit').button('loading');
-
-    $.post('stepSubmit.php?step=2&session_token='+session_token, $('#stepTwo form').serialize(), function(data){
-
-        $('#stepTwo').hide('slow', function(){
-
-        $('#stepThree').slideDown('slow');
-
-      });
-
-    });
-
-  });
-
-});
-
-</script>
-
+.container p {
+	margin-top: 20px;
+}
+</style>
 </head>
 
-
-
 <body>
+<?php include('nav_body.php'); ?>
 
-	<div class="container">
-    <div id="stepOne">
 
-        <?php //$result=mysqli_query($con, "SELECT ip FROM takers WHERE ip='$_SERVER[REMOTE_ADDR]'");
-        // $count=0;
-        // while($row=mysqli_fetch_array($result)){
-        //   $count++;
-        // }
-        // if ($count >= 5){
-        //   echo "<h2>You have taken the survey too many times.<h2>";
-        //   exit;
-        // }
-        ?>
+<div class="container">
+	<div class="row">
+      <h1><?php echo $survey->name; ?></h1>
+    	<?php
+		if (reset($_POST)) { //If first element in array is true
+			require('mysql.php');
+			//Insert Feedback to database
+      foreach($_POST as $var => $val)
+      {
+         $_POST[$var] = mysqli_real_escape_string($con, $val);
+      }
 
-            <form id="userInformation">
-            
-            <cms:editable name='welcome_text' desc="First text the visitor sees" type='richtext'>
-              <h1>Your Information</h1>
-            </cms:editable>
-              <div class="form-group col-sm-6">
+			$rand = substr(md5(rand()), 0, 10);
 
-                <label for="firstName">First Name</label>
+      //Prepared statement for DB
+      $stmt = mysqli_prepare($con, "INSERT INTO results (question_id,response,session_token) VALUES (?,?,'$rand')");
+			foreach($_POST as $key=>$response){
+				$bind = mysqli_stmt_bind_param($stmt, "is", $key, $response);
+        mysqli_stmt_execute($stmt);
+			}
+      mysqli_stmt_close($stmt);
+			// //Escape strings
+			// $q1=mysqli_real_escape_string($con,$_POST['question_1']);
+			// $q2=mysqli_real_escape_string($con,$_POST['question_2']);
+			// $q3=mysqli_real_escape_string($con,$_POST['question_3']);
+			// $q4=mysqli_real_escape_string($con,$_POST['question_4']);
+			// $q5=mysqli_real_escape_string($con,$_POST['question_5']);
 
-                <input type="text" required name="firstName" class="form-control" id="firstName" placeholder="First Name"/>
 
-              </div>
+			// //Send email with feedback to Eternal Reminder
+			$emailMessage="<h3>Survey Submitted</h3>";
+      $result = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
+      while($row = mysqli_fetch_array($result)){
+        $num = $row['id'];
+        $emailMessage.="<b>{$row[question]}</b><p>{$_POST[$num]}</p>";
+      }
+			$emailMessage.="<hr>";
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+			$headers .= "From: no-reply <{$survey->email}>";
+			mail($survey->email, $survey->name.' submission', $emailMessage, $headers);
+			// //Log the feedback received
 
-              <div class="form-group col-sm-6">
+			mysqli_close($con);
+			
+			echo '<div class="success bg-success" style="height:50px; padding-top:10px; padding-left:30px; font-size:16px">Thank you for your feedback. It is greatly appriciated!</div>';
+		  
+    }
+		?>
+    </div>
+    
+    <form method="post" action="">
 
-                <label for="lastName">Last Name</label>
-
-                <input type="text" class="form-control" required id="lastName" name="lastName" placeholder="Last Name"/>
-
-              </div>
-
-             <div class="form-group col-sm-12">
-
-                  <button type="submit" id="submit" data-loading-text="Checking..." class="btn btn-default" autocomplete="off">
-
-                  Continue >>
-
-                </button>
-
-             </div>
-
-            </form>
-
-        </div>
-        <div id="stepTwo" style="display:none">
-          	<h1>Questions</h1>
-
-        	<form>
-
-            
-            <?php 
+<?php 
               //Connect to DB and get questions
-              
-              $result = mysqli_query($con, "SELECT * FROM questions");
+              require('mysql.php');
+
+              $result = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
               while($row = mysqli_fetch_array($result)){
                 $choices = json_decode($row['choices']);
                 //print_r($choices);
@@ -242,34 +200,9 @@ $(document).ready(function(){
                 }
               }
             ?>
-            
-            <div class="form-group col-sm-12">
-
-                  <button type="button" id="submit" data-loading-text="Submitting..." class="btn btn-default" autocomplete="off">
-
-                  Finish >>
-
-                </button>
-
-             </div>
-
-            </form>
-
-        </div>
-
-        
-
-        <div id="stepThree" style="display:none">
-          	<h1>Thank you!</h1>
-
-            <p>Thank you for taking the survey. Your responses have been recorded.</p>
-
-            <hr>
-
-        </div>
-
-    </div>
-
+	
+    <button type="submit" id="submit" class='btn btn-success'>Submit</button>
+    </form>
+</div>
 </body>
-
 </html>

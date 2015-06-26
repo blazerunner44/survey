@@ -19,14 +19,10 @@ switch($_POST['type']){
 	default:
 		$type='option';
 }
-print_r($_POST);
+
 //Convert choices to JSON
-if(isset($_POST['choices'])){
 $choices=json_encode($_POST['choices']);
-}else{
-	$choices = '[""]';
-}
+print_r($_POST);
 
-
-mysqli_query($con, "INSERT INTO questions (question,type,description,choices) VALUES ('".mysqli_escape_string($con,$_POST[name])."','$type', '".mysqli_escape_string($_POST[description])."','".mysqli_escape_string($choices)."')") or die(mysqli_error($con));
+mysqli_query($con, "INSERT INTO questions (question,type,description,choices) VALUES ('$_POST[name]','$type', '$_POST[description]','$choices')") or die(mysqli_error($con));
 ?>
