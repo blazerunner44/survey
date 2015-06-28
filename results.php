@@ -80,6 +80,10 @@ $(document).ready(function(){
 			var choices = $("#choices");
 			var sliderChoices = $("#sliderChoices");
 
+			$('#new_choice').click(function(){
+				$('#new_choice').prepend('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
+			});
+
 			$("#choices").detach();
 			$("#sliderChoices").detach();
 
@@ -283,8 +287,7 @@ $(document).ready(function(){
 												      		<div class="form-group">
 												      			<input type="text" name="choices[]" class="form-control" placeholder='Enter a Choice' />
 											      			</div>
-											      		
-											      			<span id='new_choice' class='add-new'></span> Add New Choice<br><br>
+											      			<div id='new_choice'> <span class='add-new'></span> Add New Choice</div>
 											      		</div>
 
 											      		<div id="sliderChoices">
