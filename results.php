@@ -52,6 +52,10 @@ function fullType($input){
 		.containter-fluid{
 			margin-top:20px;
 		}
+		h1 a{
+			text-decoration: none;
+			font-size:18px;
+		}
 		span {
 			font-size: 18px;
 			word-spacing: -12;
@@ -188,7 +192,8 @@ $(document).ready(function(){
 		<div class="containter-fluid">
 			<div class="row">
 				<div class="col-xs-12 col-md-8 col-md-offset-2">
-					<h1 class="col-md-offset-1"><?php echo $survey->name;?></h1>
+					<h1 class="col-md-offset-1"><?php echo $survey->name;?> &nbsp; <a href="index.php" target="_blank">View Survey</a></h1>
+
 					<?php
 					require('mysql.php');
 					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
