@@ -71,6 +71,9 @@ function fullType($input){
 		.questionOption{
 			margin-bottom:10px;
 		}
+		.showMore, .showLess{
+			cursor: pointer;
+		}
 		</style>
 
 		<!-- Styles for "NEW" button -->
@@ -217,7 +220,7 @@ $(document).ready(function(){
 									<?php
 									//Calculate % for each question
 									
-									$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='$row[id]'");
+									$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='$row[id]' ORDER BY id DESC");
 									
 									$result_array = array();
 									$count=0;
@@ -236,20 +239,37 @@ $(document).ready(function(){
 									//print_r($result_array);
 									?>
 							    	<div id=<?php echo "collapse{$row[id]}"; ?> class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-							    		<?php if($count==0){echo "<div class='panel-body'><h3>No Responses Recorded</h3></div>";} ?>
-							    		<?php foreach($result_array as $response=>$number){?>
-							      		<div class="panel-body">
-							      			<h3><?php echo stripslashes($response); ?></h3>
-							      			<?php if ($row['type'] != 'paragraph' and $row['type'] != 'text'){?>
-							      				
-							        		<div class="progress">
-				  								<div class="progress-bar progress-bar-<?php if(strtolower($response) == "no"){echo "danger";}else{echo "success";}?> progress-bar-striped" role="progressbar" aria-valuenow='<?php echo ($number/$count)*100 ."%" ?>' aria-valuemin="0" aria-valuemax="100" style='width: <?php echo ($number/$count)*100 ."%" ?>'>
-				    								<?php echo round(($number/$count)*100) ."%  ({$number} votes)" ?>
-				  								</div>
+							    		<?php 
+							    		if($count==0){
+							    			echo "<div class='panel-body'><h3>No Responses Recorded</h3></div>";
+							    		} 
+
+							    		$hideCount = 0;
+
+							    		foreach($result_array as $response=>$number){?>
+								    		<?php 
+								      			if($hideCount == 5){
+								      				echo "<div class='panel-body showMore'><span class='glyphicon glyphicon-chevron-down'></span></div>";
+								      			}
+								      		?>
+								      		<div class="panel-body" <?php if($hideCount >= 5){ echo 'style="display:none"';} ?> >
+								      			<h3>
+								      				<?php 
+								      					echo stripslashes($response);
+								      					$hideCount++; 
+								      				?>
+								      			</h3>
+								      			<?php if ($row['type'] != 'paragraph' and $row['type'] != 'text'){?>
+								      				
+								        		<div class="progress">
+					  								<div class="progress-bar progress-bar-<?php if(strtolower($response) == "no"){echo "danger";}else{echo "success";}?> progress-bar-striped" role="progressbar" aria-valuenow='<?php echo ($number/$count)*100 ."%" ?>' aria-valuemin="0" aria-valuemax="100" style='width: <?php echo ($number/$count)*100 ."%" ?>'>
+					    								<?php echo round(($number/$count)*100) ."%  ({$number} votes)" ?>
+					  								</div>
+												</div>
+												<?php }?>
 											</div>
-											<?php }?>
-										</div>
 										<?php } ?>
+										<div class='panel-body showLess' style="display:none"><span class='glyphicon glyphicon-chevron-up'></span></div>
 							    	</div>
 							    	
 							  	</div>
@@ -349,6 +369,20 @@ $(document).ready(function(){
 					location.reload();
 				});
 				
+			});
+
+			$('.showMore').click(function(){
+				//alert('success');
+				$(this).siblings().slideDown();
+				$(this).hide();
+				$(this).siblings('.showLess').show();
+			});
+
+			$('.showLess').click(function(){
+				//$(this).siblings().slideUp();
+				$(this).siblings('.showMore').show();
+				$(this).siblings().slice(6,$(this).siblings().length).slideUp();
+				$(this).hide();
 			});
 		});
 		</script>
