@@ -77,7 +77,7 @@ label {
 			// $q5=mysqli_real_escape_string($con,$_POST['question_5']);
 
 
-			// //Send email with feedback to Eternal Reminder
+			// //Send email with feedback to admin
 			$emailMessage="<h3>Survey Submitted</h3>";
       $result = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
       while($row = mysqli_fetch_array($result)){
@@ -88,7 +88,7 @@ label {
 			$headers  = 'MIME-Version: 1.0' . "\r\n";
 			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 			$headers .= "From: no-reply <{$survey->email}>";
-			mail($survey->email, $survey->name.' submission', $emailMessage, $headers);
+			mail($survey->email, $survey->name.' Submission', $emailMessage, $headers);
 			// //Log the feedback received
 
 			mysqli_close($con);
