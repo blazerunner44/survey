@@ -1,7 +1,7 @@
 <?php
 if($_POST['submit']){
 	$myfile = fopen("mysql.php", "w") or die("Unable to open file!");
-	$txt = "<?php \$con = mysqli_connect('{$_POST[host]}','{$_POST[user]}','{$_POST[password]}','{$_POST[dbName]}'); ?>";
+	$txt = "<?php \$con = mysqli_connect('{$_POST[host]}','{$_POST[user]}','{$_POST[dbPassword]}','{$_POST[dbName]}'); ?>";
 	fwrite($myfile, $txt);
 
 	require('mysql.php');
@@ -26,7 +26,7 @@ if($_POST['submit']){
 	)";
 	mysqli_query($con, $query);
 
-	//Create TAKERS table
+	//Create SETTINGS table
 	$query="CREATE TABLE settings (
 	name VARCHAR(100) PRIMARY KEY NOT NULL,
 	value VARCHAR(100) NOT NULL
@@ -37,7 +37,19 @@ if($_POST['submit']){
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('name', '$_POST[name]')");
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', '$_POST[email]')");
 
-	header('Location: results.php');
+	//Create USERS table
+	$query="CREATE TABLE users (
+	username VARCHAR(100) PRIMARY KEY NOT NULL,
+	password VARCHAR(500) NOT NULL
+	)";
+	mysqli_query($con, $query);
+
+	//Add admin user
+	$password_hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
+	mysqli_query($con, "INSERT INTO users (username, password) VALUES ('$_POST[username]', '$password_hash')");
+
+	//Redirect to log in
+	header('Location: admin/');
 }
 ?>
 <html>
@@ -59,6 +71,16 @@ if($_POST['submit']){
 			<div class="form-group col-sm-6">
 			    <label for="email">Your Email</label>
 			    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email">
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group col-sm-6">
+			    <label for="name">Your Username</label>
+			    <input type="text" class="form-control" id="username" name="username" placeholder="Username for admin user">
+			</div>
+			<div class="form-group col-sm-6">
+			    <label for="email">Your Password</label>
+			    <input type="password" class="form-control" id="password" name="password" placeholder="Password for admin user">
 			</div>
 		</div>
 		<div class="row">
@@ -84,8 +106,8 @@ if($_POST['submit']){
 			</div>
 			<div class="col-sm-6">
 				<div class="form-group">
-				    <label for="password">Database Password</label>
-				    <input type="password" class="form-control" id="password" name="password" placeholder="Enter the password of your database">
+				    <label for="dbPassword">Database Password</label>
+				    <input type="password" class="form-control" id="dbPassword" name="dbPassword" placeholder="Enter the password of your database">
 				</div>
 			</div>
 		</div>

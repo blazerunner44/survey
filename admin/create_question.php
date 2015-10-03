@@ -1,5 +1,5 @@
 <?php
-require('mysql.php');
+require('../mysql.php');
 switch($_POST['type']){
 	case 'Yes or No':
 		$type='yn';

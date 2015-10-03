@@ -8,7 +8,7 @@
 <html>
 <head>
 <?php
-require('class.php');
+require('Survey.php');
 require_once('mysql.php');
 $survey = new Survey();
 ?>

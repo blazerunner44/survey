@@ -2,8 +2,14 @@
 // ini_set('display_errors',1);
 // ini_set('display_startup_errors',1);
 // error_reporting(-1); 
-require('class.php');
-require_once('mysql.php');
+session_start();
+require('../Survey.php');
+require_once('../mysql.php');
+
+if($_SESSION['auth'] != True){
+	header('Location: index.php');
+	exit;
+}
 $survey = new Survey();
 
 function fullType($input){
@@ -35,11 +41,11 @@ function fullType($input){
 
 <html>
 	<head>
-		<script src="includes/jquery.min.js"></script>
-		<script src="bootstrap/js/bootstrap.min.js"></script>
+		<script src="../includes/jquery.min.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
 		<title>Survey Results</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="http://bootswatch.com/yeti/bootstrap.min.css">
 		<!-- <link rel="stylesheet" href="https://bootswatch.com/sandstone/bootstrap.min.css"> -->
 		<style>
@@ -74,13 +80,16 @@ function fullType($input){
 		.showMore, .showLess{
 			cursor: pointer;
 		}
+		#new_choice{
+			cursor: pointer;
+		}
 		</style>
 
 		<!-- Styles for "NEW" button -->
-	    <script src="new_button/js/prefixfree.min.js"></script>
-	    <script src="new_button/js/modernizr.js"></script>
-		<link type="text/css" rel="stylesheet" href="new_button/css/normalize.css" />
-		<link type="text/css" rel="stylesheet" href="new_button/css/style.css" />
+	    <script src="../new_button/js/prefixfree.min.js"></script>
+	    <script src="../new_button/js/modernizr.js"></script>
+		<link type="text/css" rel="stylesheet" href="../new_button/css/normalize.css" />
+		<link type="text/css" rel="stylesheet" href="../new_button/css/style.css" />
 
 <script>
 $(document).ready(function(){
@@ -88,7 +97,7 @@ $(document).ready(function(){
 			var sliderChoices = $("#sliderChoices");
 
 			$('#new_choice').click(function(){
-				$('#new_choice').prepend('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
+				$(this).before('<div class="form-group"> <input type="text" name="choices[]" class="form-control" placeholder="Enter a Choice" /> </div>');
 			});
 
 			$("#choices").detach();
@@ -195,10 +204,9 @@ $(document).ready(function(){
 		<div class="containter-fluid">
 			<div class="row">
 				<div class="col-xs-12 col-md-8 col-md-offset-2">
-					<h1 class="col-md-offset-1"><?php echo $survey->name;?> &nbsp; <a href="index.php" target="_blank">View Survey</a></h1>
+					<h1 class="col-md-offset-1"><?php echo $survey->name;?> &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right; margin-right:120px">Logout</a></h1>
 
 					<?php
-					require('mysql.php');
 					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
 					while($row = mysqli_fetch_array($question_query)){?>
 						<div class="col-xs-12 col-md-10 col-md-offset-1">
