@@ -55,10 +55,11 @@ label {
 		if (reset($_POST)) { //If first element in array is true
 			require('mysql.php');
 			//Insert Feedback to database
-      foreach($_POST as $var => $val)
-      {
-         $_POST[$var] = mysqli_real_escape_string($con, $val);
-      }
+      // foreach($_POST as $var => $val)
+      // {
+      //    $_POST[$var] = mysqli_real_escape_string($con, $val);
+      // }
+      $_POST = Survey::escapeInput($_POST);
 
 			$rand = substr(md5(rand()), 0, 10);
 
@@ -69,20 +70,13 @@ label {
         mysqli_stmt_execute($stmt);
 			}
       mysqli_stmt_close($stmt);
-			// //Escape strings
-			// $q1=mysqli_real_escape_string($con,$_POST['question_1']);
-			// $q2=mysqli_real_escape_string($con,$_POST['question_2']);
-			// $q3=mysqli_real_escape_string($con,$_POST['question_3']);
-			// $q4=mysqli_real_escape_string($con,$_POST['question_4']);
-			// $q5=mysqli_real_escape_string($con,$_POST['question_5']);
-
 
 			// //Send email with feedback to admin
 			$emailMessage="<h3>Survey Submitted</h3>";
       $result = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
       while($row = mysqli_fetch_array($result)){
         $num = $row['id'];
-        $emailMessage.="<b>{$row[question]}</b><p>{$_POST[$num]}</p>";
+        $emailMessage.="<b>{$row[question]}</b><p>" .stripslashes($_POST[$num]) ."</p>";
       }
 			$emailMessage.="<hr>";
 			$headers  = 'MIME-Version: 1.0' . "\r\n";

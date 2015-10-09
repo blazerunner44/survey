@@ -3,7 +3,6 @@ session_start();
 require_once('../Survey.php');
 if($_SESSION['auth'] == True){
 	header('Location: results.php');
-	echo 'hi';
 }
 
 if(isset($_POST['submit'])){
