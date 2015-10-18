@@ -24,6 +24,7 @@ $survey = new Survey();
 <link href="bootstrap/slider/jquery-ui-slider-pips.css" rel="stylesheet" type="text/css">
 
 <link rel="stylesheet" type="text/css" href="http://bootswatch.com/yeti/bootstrap.min.css">
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 
 <style type="text/css">
 /*#submit {
