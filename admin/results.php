@@ -83,6 +83,28 @@ function fullType($input){
 		#new_choice{
 			cursor: pointer;
 		}
+		#settings{
+			display:none;
+			width:100%;
+			height:100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+			background-color: rgba(255,255,255,0.95);
+		}
+		#settings input, #settings textarea, #settings button{
+			margin-bottom: 10px;
+		}
+		#closeSettings{
+			font-size:32pt;
+			font-weight: lighter;
+			position: fixed;
+			right: 20px;
+			color: black;
+		    text-decoration: none;
+		    cursor: pointer;
+			z-index: 10;
+		}
 		</style>
 
 		<!-- Styles for "NEW" button -->
@@ -204,7 +226,7 @@ $(document).ready(function(){
 		<div class="containter-fluid">
 			<div class="row">
 				<div class="col-xs-12 col-md-8 col-md-offset-2">
-					<h1 class="col-md-offset-1"><?php echo $survey->name;?> &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right; margin-right:120px">Logout</a></h1>
+					<h1 class="col-md-offset-1 col-md-10 col-xs-12"><?php echo $survey->name;?> &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
 
 					<?php
 					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
@@ -394,5 +416,19 @@ $(document).ready(function(){
 			});
 		});
 		</script>
+
+		<div id="settings" class="container">
+			<a id="closeSettings" onclick="$('#settings').hide();$('html').css('overflow', 'scroll');">X</a>
+			<div class="col-sm-12 col-md-10 col-md-offset-2">
+				<h1>Settings</h1>
+				<hr>
+				<form action="updateSettings.php" method="POST">
+					<input name="name" class="form-control" placeholder="Survey Name" value="<?= $survey->name; ?>"/>
+					<input name="email" class="form-control" placeholder="Survey Email" value="<?= $survey->email; ?>" />
+					<textarea name="description" class="form-control" placeholder="Survey Description" rows="10"><?= $survey->description; ?></textarea>
+					<button type="submit" class="btn btn-primary" style="float:right"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+				</form>
+			</div>
+		</div>
 	</body>
 </html>

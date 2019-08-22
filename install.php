@@ -29,13 +29,14 @@ if($_POST['submit']){
 	//Create SETTINGS table
 	$query="CREATE TABLE settings (
 	name VARCHAR(100) PRIMARY KEY NOT NULL,
-	value VARCHAR(100) NOT NULL
+	value VARCHAR(10000) NOT NULL
 	)";
 	mysqli_query($con, $query);
 
 	//Populate settings table
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('name', '$_POST[name]')");
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', '$_POST[email]')");
+	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', 'Default survey description')");
 
 	//Create USERS table
 	$query="CREATE TABLE users (

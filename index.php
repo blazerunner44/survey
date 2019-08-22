@@ -23,7 +23,7 @@ $survey = new Survey();
 <script src="bootstrap/slider/jquery-ui-slider-pips.js"></script>
 <link href="bootstrap/slider/jquery-ui-slider-pips.css" rel="stylesheet" type="text/css">
 
-<link rel="stylesheet" type="text/css" href="http://bootswatch.com/yeti/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 
 <style type="text/css">
@@ -52,6 +52,8 @@ label {
 <div class="container">
 	<div class="row">
       <h1><?php echo $survey->name; ?></h1>
+	  <p><?php echo $survey->description; ?></p>
+	  <hr>
     	<?php
 		if (reset($_POST)) { //If first element in array is true
 			require('mysql.php');

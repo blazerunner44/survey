@@ -2,16 +2,15 @@
 class Survey {
 	public $name;
     public $email;
+	public $description;
 	
 	public function __construct() {
 		require('mysql.php');
-		$row = mysqli_query($con, "SELECT value FROM settings WHERE name='name'");
-		$row = mysqli_fetch_array($row);
-		$this->name = $row['value'];
-
-		$row = mysqli_query($con, "SELECT value FROM settings WHERE name='email'");
-		$row = mysqli_fetch_array($row);
-		$this->email = $row['value'];
+		$sql = mysqli_query($con, "SELECT * FROM settings");
+		while($row = mysqli_fetch_assoc($sql)){
+			$this->{$row['name']} = $row['value'];
+		}
+		
 	}
 
 	public static function verifyUser($username, $password){
@@ -43,6 +42,10 @@ class Survey {
 				return False;
 				break;
 		}
+	}
+	public function updateValue($valueName, $value){
+		$this->$valueName = $value;
+		mysqli_query($con, "UPDATE settings SET value='$value' WHERE name='$valueName'");
 	}
 }
 ?>
