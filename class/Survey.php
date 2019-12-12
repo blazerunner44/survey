@@ -3,6 +3,8 @@ class Survey {
 	public $name;
     public $email;
 	public $description;
+
+	private $questions = array();
 	
 	public function __construct() {
 		require('mysql.php');
@@ -46,6 +48,9 @@ class Survey {
 	public function updateValue($valueName, $value){
 		$this->$valueName = $value;
 		mysqli_query($con, "UPDATE settings SET value='$value' WHERE name='$valueName'");
+	}
+	public function getQuestions(){
+		return Question::getAll();
 	}
 }
 ?>
