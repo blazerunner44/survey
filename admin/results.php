@@ -3,34 +3,40 @@
 // ini_set('display_startup_errors',1);
 // error_reporting(-1); 
 session_start();
-require('../Survey.php');
-require_once('../mysql.php');
+require_once '../mysql.php';
+require '../class/Survey.php';
+require '../class/Question.php';
+
 
 if($_SESSION['auth'] != True){
 	header('Location: index.php');
 	exit;
 }
 $survey = new Survey();
+$questions = $survey->getQuestions();
 
 function fullType($input){
 	switch($input){
-		case 'yn':
+		case Question::TYPE_YESORNO:
 		 	$type = 'Yes or No';
 			break;
-		case 'option':
+		case Question::TYPE_OPTION:
 			$type = "Multiple Choice";
 			break;
-		case 'expanded_option':
+		case Question::TYPE_EXPANDED_OPTION:
 			$type = 'Multiple Choice (expanded)';
 			break;
-		case 'slider':
+		case Question::TYPE_SLIDER:
 			$type = 'Slider';
 			break;
-		case 'text':
+		case Question::TYPE_TEXT:
 			$type = 'Text Box';
 			break;
-		case 'paragraph':
+		case Question::TYPE_PARAGRAPH:
 			$type = 'Paragraph';
+			break;
+		case Question::TYPE_CHECKBOX:
+			$type = 'Checkbox';
 			break;
 		default:
 			$type='unknown question type';
@@ -229,20 +235,20 @@ $(document).ready(function(){
 					<h1 class="col-md-offset-1 col-md-10 col-xs-12"><?php echo $survey->name;?> &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
 
 					<?php
-					$question_query = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
-					while($row = mysqli_fetch_array($question_query)){?>
+					foreach($questions as $question){
+					?>
 						<div class="col-xs-12 col-md-10 col-md-offset-1">
 							<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 							  	<div class="panel panel-default">
 							    	<div class="panel-heading" role="tab" id="headingOne">
 							      		<h4 class="panel-title">
-							        		<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href='<?php echo "#collapse{$row[id]}"; ?>' aria-expanded="false" aria-controls=<?php echo "collapse{$row[id]}"; ?>>
-							          			<span class="glyphicon glyphicon-chevron-down" aria-hidden="false">&nbsp;&nbsp; <?php $type = fullType($row['type']); echo "{$row[question]} <small><i>{$type}</i></small>"; ?></span>
+							        		<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href='collapse<?=$question->pk?>' aria-expanded="false" aria-controls='collapse<?=$question->pk?>'>
+							          			<span class="glyphicon glyphicon-chevron-down" aria-hidden="false">&nbsp;&nbsp; <?=$question->title?> <small><i><?=fullType($question->type)?></i></small></span>
 							        			
 							        		</a>
 
-							        		<span class="glyphicon glyphicon-remove remove" style="float:right;" id='<?php echo "{$row[id]}"; ?>'></span>
-							        		<span class="glyphicon glyphicon-pencil edit" style="float:right;" id='<?php echo "{$row[id]}"; ?>'></span>
+							        		<span class="glyphicon glyphicon-remove remove" style="float:right;" id='<?=$question->pk?>'></span>
+							        		<span class="glyphicon glyphicon-pencil edit" style="float:right;" id='<?=$question->pk?>'></span>
 							        		<span class="level" style="float:right">Rank</span>
 							      		</h4>
 							    	</div>
@@ -250,7 +256,7 @@ $(document).ready(function(){
 									<?php
 									//Calculate % for each question
 									
-									$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='$row[id]' ORDER BY id DESC");
+									$results=mysqli_query($con, "SELECT * FROM results WHERE question_id='{$question->pk}' ORDER BY id DESC");
 									
 									$result_array = array();
 									$count=0;
@@ -268,7 +274,7 @@ $(document).ready(function(){
 									}
 									//print_r($result_array);
 									?>
-							    	<div id=<?php echo "collapse{$row[id]}"; ?> class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+							    	<div id='collapse<?=$question->pk?>' class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
 							    		<?php 
 							    		if($count==0){
 							    			echo "<div class='panel-body'><h3>No Responses Recorded</h3></div>";
@@ -289,7 +295,7 @@ $(document).ready(function(){
 								      					$hideCount++; 
 								      				?>
 								      			</h3>
-								      			<?php if ($row['type'] != 'paragraph' and $row['type'] != 'text'){?>
+								      			<?php if ($question->type != Question::TYPE_PARAGRAPH and $question->type != Question::TYPE_TEXT){?>
 								      				
 								        		<div class="progress">
 					  								<div class="progress-bar progress-bar-<?php if(strtolower($response) == "no"){echo "danger";}else{echo "success";}?> progress-bar-striped" role="progressbar" aria-valuenow='<?php echo ($number/$count)*100 ."%" ?>' aria-valuemin="0" aria-valuemax="100" style='width: <?php echo ($number/$count)*100 ."%" ?>'>
@@ -332,6 +338,7 @@ $(document).ready(function(){
 										      				<option class='nochoice'>Paragraph</option>
 										      				<option class='choices'>Multiple Choice</option>
 										      				<option class='choices'>Multiple Choice (expanded)</option>
+										      				<option class='choices'>Checkbox</option>
 										      				<option class="slider">Slider</option>
 										      			</select>
 										      		</div>

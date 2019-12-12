@@ -10,19 +10,23 @@ abstract class Model{
 			);
 	}
 
+	public $pk;
+
 	public static function getAll(){
 		$con = self::getConnection();
 
 		$list = array();
 		
-		$query = "SELECT " . self::getArgsList() . " FROM " . self::getTableName();
+		$query = "SELECT " . self::getPkField() . ',' . self::getArgsList() . " FROM " . self::getTableName();
 		$result = $con->query($query);
 		if(!$result){
 			throw new Exception("Error executing query " . $query, 1);
 		}
 
 		while($row = $result->fetch_array(MYSQLI_NUM)){
-			array_push($list, new static(...$row));
+			$obj = new static(...array_slice($row, 1, count($row)-1));
+			$obj->pk = $row[0];
+			array_push($list, $obj);
 		}
 
 		return $list;
@@ -41,9 +45,16 @@ abstract class Model{
 	}
 
 	private static function getTableName(){
-		if(!empty(static::tableName)){
+		if(defined(get_called_class() . '::tableName')){
 			return static::tableName;
 		}
 		return strtolower(static::class);
+	}
+
+	private static function getPkField(){
+		if(defined(get_called_class() . '::pkField')){
+			return static::pkField;
+		}
+		return 'id';
 	}
 }

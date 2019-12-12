@@ -11,13 +11,13 @@ class Question extends Model{
 
 	const tableName = 'questions';
 
-	const YESORNO = 'yn';
-	const SLIDER = 'slider';
-	const OPTION = 'option';
-	const EXPANDED_OPTION = 'expanded_option';
-	const PARAGRAPH = 'paragraph'; 
-	const TEXT = 'text';
-	const CHECKBOX = 'checkbox';
+	const TYPE_YESORNO = 'yn';
+	const TYPE_SLIDER = 'slider';
+	const TYPE_OPTION = 'option';
+	const TYPE_EXPANDED_OPTION = 'expanded_option';
+	const TYPE_PARAGRAPH = 'paragraph'; 
+	const TYPE_TEXT = 'text';
+	const TYPE_CHECKBOX = 'checkbox';
 
 	public function __construct($title, $description, $type, $pos, $choices){
 		$this->title = $title;
@@ -30,23 +30,23 @@ class Question extends Model{
 
 	public function getHTML(){
 		switch($this->type){
-			case self::TEXT:
+			case self::TYPE_TEXT:
 				return "<div class='form-group col-sm-12'>
 
-			              <label for='{$this->id}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
+			              <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
 
-			              <input type='text' class='form-control' name='{$this->id}' required placeholder='Enter response' />
+			              <input type='text' class='form-control' name='{$this->pk}' required placeholder='Enter response' />
 
 			          </div>";
-			case self::PARAGRAPH:
+			case self::TYPE_PARAGRAPH:
 			    return "<div class='form-group col-sm-12'>
 
-			              <label for='{$this->id}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
+			              <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
 
-			              <textarea class='form-control' rows='5' maxlength='5000' name='{$this->id}' required></textarea>
+			              <textarea class='form-control' rows='5' maxlength='5000' name='{$this->pk}' required></textarea>
 
 			          </div>";
-			case self::YESORNO:
+			case self::TYPE_YESORNO:
 			    return "<div class='col-sm-12'>
 
 			        <h4>{$this->title}<small> {$this->description}</small></h4><br>
@@ -55,26 +55,26 @@ class Question extends Model{
 
 			          <label class='btn btn-primary btn-lg'>
 
-			            <input type='radio' name='{$this->id}' id='option2' autocomplete='off' value='Yes'> Yes
+			            <input type='radio' name='{$this->pk}' id='option2' autocomplete='off' value='Yes'> Yes
 
 			          </label>
 
 			          <label class='btn btn-primary btn-lg'>
 
-			            <input type='radio' name='{$this->id}' id='option3' autocomplete='off' value='No'> No
+			            <input type='radio' name='{$this->pk}' id='option3' autocomplete='off' value='No'> No
 
 			          </label>
 
 			        </div>
 
 			     </div>";
-			case self::OPTION:
-			case self::EXPANDED_OPTION:
+			case self::TYPE_OPTION:
+			case self::TYPE_EXPANDED_OPTION:
 			    $return = "<div class='form-group col-sm-12' style='margin-top:13px'>
 
-			         <label for='{$this->id}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
+			         <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
 
-			        <select name='{$this->id}' " . ($this->type == self::EXPANDED_OPTION ? 'multiple' : '') . " class='form-control'>";
+			        <select name='{$this->pk}' " . ($this->type == self::TYPE_EXPANDED_OPTION ? 'multiple' : '') . " class='form-control'>";
 
 			          foreach($this->choices as $choice){
 			            $return .= "<option>{$choice}</option>";
@@ -84,15 +84,25 @@ class Question extends Model{
 
 			    </div>";
 			    return $return;
-			case self::SLIDER:
+			case self::TYPE_CHECKBOX:
+				$return = "<div class='form-group col-sm-12' style='margin-top:13px'>
+
+			        <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>";
+		        	foreach($this->choices as $choice){
+		        		$return .= "<input type='checkbox' name='{$this->pk}[]'>{$choice}</option>";
+		        	}
+
+			        $return .= "</div>";
+			    return $return;
+			case self::TYPE_SLIDER:
 			    $return = "<script>
 			      $(document).ready(function(){
-			      $('#{$this->id}slider')
+			      $('#{$this->pk}slider')
 			          .slider({
 			              min: {$this->choices[0]},
 			              max: {$this->choices[1]},
 			              change: function(event, ui) {
-			                $('#{$this->id}').attr('value', ui.value);
+			                $('#{$this->pk}').attr('value', ui.value);
 			              }
 			          })
 			          .slider('pips', {
@@ -100,8 +110,8 @@ class Question extends Model{
 			          })
 			      });
 			      </script>";
-			    $return .= "<div class='form-group col-sm-12'><label><h4>{$this->title} <small>{$this->description}</small></h4></label><div id='{$this->id}slider'></div></div>";
-			    $return .= "<input type='hidden' name='{$this->id}' id='{$this->id}'/>";
+			    $return .= "<div class='form-group col-sm-12'><label><h4>{$this->title} <small>{$this->description}</small></h4></label><div id='{$this->pk}slider'></div></div>";
+			    $return .= "<input type='hidden' name='{$this->pk}' id='{$this->pk}'/>";
 			    return $return;
 			default:
 			    return "<h5>unknown question type</h5>";

@@ -7,7 +7,7 @@ class Survey {
 	private $questions = array();
 	
 	public function __construct() {
-		require('mysql.php');
+		$con = mysqli_connect('localhost','admin_survey','survey','admin_survey');
 		$sql = mysqli_query($con, "SELECT * FROM settings");
 		while($row = mysqli_fetch_assoc($sql)){
 			$this->{$row['name']} = $row['value'];

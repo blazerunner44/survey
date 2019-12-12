@@ -9,7 +9,7 @@ if($_POST['submit']){
 	//Create QUESTIONS table
 	$query="CREATE TABLE questions (
 	id INT(11) AUTO_INCREMENT PRIMARY KEY,
-	question VARCHAR(500) NOT NULL,
+	title VARCHAR(500) NOT NULL,
 	type VARCHAR(500) NOT NULL,
 	description VARCHAR(500),
 	choices VARCHAR(2000),
@@ -24,6 +24,9 @@ if($_POST['submit']){
 	response VARCHAR(5000) NOT NULL,
 	session_token VARCHAR(10)
 	)";
+	mysqli_query($con, $query);
+	//Add foreign key
+	$query = "ALTER TABLE results ADD CONSTRAINT fk_questions-id FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE ON UPDATE CASCADE";
 	mysqli_query($con, $query);
 
 	//Create SETTINGS table

@@ -1,10 +1,12 @@
 <?php
-require 'class/Survey.php';
 require 'class/Question.php';
+require 'class/Survey.php';
 
 require_once('mysql.php');
 $survey = new Survey();
 $questions = $survey->getQuestions();
+// var_dump($questions);
+// exit;
 ?>
 
 <!DOCTYPE html>
