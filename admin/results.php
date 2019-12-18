@@ -20,6 +20,8 @@ $questions = $survey->getQuestions();
 	<head>
 		<script src="../includes/jquery.min.js"></script>
 		<script src="../bootstrap/js/bootstrap.min.js"></script>
+		<script src="../includes/chart.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../includes/chart.min.css">
 		<title>Survey Results</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
@@ -83,26 +85,32 @@ $questions = $survey->getQuestions();
 		}
 		</style>
 
-		<!-- Styles for "NEW" button -->
-	    <script src="../new_button/js/prefixfree.min.js"></script>
-	    <script src="../new_button/js/modernizr.js"></script>
-		<link type="text/css" rel="stylesheet" href="../new_button/css/normalize.css" />
-		<link type="text/css" rel="stylesheet" href="../new_button/css/style.css" />
-
 	</head>
 	<body>
 		<div id="app" class="containter-fluid">
+			<div class="row">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<h1>{{ surveyTitle }} &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
+				</div>
+				<div class="col-md-3"></div>
+			</div>
 			<div class="row" v-for="(question, index) in questions">
-				<div class="col-sm-3"></div>
-				<div class="col-sm-6">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
 					<div class="card border-secondary mb-3">
 					  <div class="card-header">{{ question.title }} <small>{{ fullType(question.type) }}</small></div>
 					  <div class="card-body">
-					    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>'">
+					    	Yes or no
+					    </template>
+					    <template v-if="question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
+					    	<canvas :id="question.pk" v-bind:index="index" class="pieChart"></canvas>
+					    </template>
 					  </div>
 					</div>
 				</div>
-				<div class="col-sm-3"></div>
+				<div class="col-md-3"></div>
 			</div>
 
 			<div id="settings" class="container">
@@ -160,7 +168,10 @@ $questions = $survey->getQuestions();
 		var app = new Vue({
         	el: '#app',
         	data: {
-        		questions: <?php echo json_encode($questions); ?>
+        		questions: <?php echo json_encode($questions); ?>,
+        		surveyTitle: "<?= $survey->name ?>",
+        		surveyDescription: "<?= $survey->description ?>",
+        		surveyEmail: "<?= $survey->email ?>"
         	},
         	computed: {
         		
@@ -186,6 +197,48 @@ $questions = $survey->getQuestions();
 							return 'unknown question type';
 					}
 				}
+        	},
+        	mounted: function(){
+        		// chart colors
+				var colors = ['#007bff','#28a745','#333333','#c3e6cb','#dc3545','#6c757d'];
+
+				/* 3 donut charts */
+				var donutOptions = {
+				  cutoutPercentage: 50, 
+				  legend: {position:'bottom', padding:5, labels: {pointStyle:'circle', usePointStyle:true}}
+				};
+
+				var charts = document.getElementsByClassName("pieChart");
+				for (var i = 0; i < charts.length; i++) {
+					//Get the data from Vue
+					var question_index = charts[i].getAttribute('index');
+					var data = {};
+					for (var j = 0; j < this.questions[question_index].responses.length; j++) {
+						if(data[this.questions[question_index].responses[j].response] == undefined){
+							data[this.questions[question_index].responses[j].response] = 1;
+						}else{
+							data[this.questions[question_index].responses[j].response] += 1;
+						}
+					};
+
+					var chartData = {
+					    labels: Object.keys(data),
+					    datasets: [
+					      {
+					        backgroundColor: colors.slice(0,3),
+					        borderWidth: 0,
+					        data: Object.values(data)
+					      }
+					    ]
+					};
+					if (charts[i]) {
+					  new Chart(charts[i], {
+					      type: 'pie',
+					      data: chartData,
+					      options: donutOptions
+					  });
+					}
+				};
         	}
 	    });
 		</script>

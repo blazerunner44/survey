@@ -1,11 +1,13 @@
 <?php
-require 'Model.php';
+require_once __DIR__ . '/Model.php';
+require_once __DIR__ . '/Response.php';
 
 class Question extends Model{
 	public $title;
 	public $description;
 	public $type;
 	public $pos;
+	public $responses;
 
 	private $choices = array();
 
@@ -19,13 +21,18 @@ class Question extends Model{
 	const TYPE_TEXT = 'text';
 	const TYPE_CHECKBOX = 'checkbox';
 
-	public function __construct($title, $description, $type, $pos, $choices){
+	public function __construct($id, $title, $description, $type, $pos, $choices){
 		$this->title = $title;
 		$this->description = $description;
 		$this->type = $type;
 		$this->pos = $pos;
 
 		$this->choices = json_decode($choices);
+		$this->responses = Response::getByColumnEqual('question_id', $id);
+	}
+
+	public function getResponses(){
+		return $this->responses;
 	}
 
 	public function getHTML(){

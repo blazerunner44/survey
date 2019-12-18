@@ -1,15 +1,6 @@
 <?php 
 
 abstract class Model{
-	private function getConnection(){
-		return mysqli_connect(
-			'localhost', //Database server
-			'admin_survey', //Database user
-			'survey', //Database password
-			'admin_survey' //Database name
-			);
-	}
-
 	public $pk;
 
 	public static function getAll(){
@@ -28,8 +19,39 @@ abstract class Model{
 			$obj->pk = $row[0];
 			array_push($list, $obj);
 		}
-
 		return $list;
+	}
+
+	public static function getByColumnEqual($colName, $colValue){
+		$con = self::getConnection();
+
+		$list = array();
+		
+		$query = "SELECT " . self::getPkField() . ',' . self::getArgsList() . " FROM " . self::getTableName() . " WHERE " . $con->escape_string($colName) . "=" . $con->escape_string($colValue);
+		$result = $con->query($query);
+		if(!$result){
+			throw new Exception("Error executing query " . $query, 1);
+		}
+
+		while($row = $result->fetch_array(MYSQLI_NUM)){
+			$obj = new static(...array_slice($row, 1, count($row)-1));
+			$obj->pk = $row[0];
+			array_push($list, $obj);
+		}
+		return $list;
+	}
+
+	public static function getByPkEqual($colValue){
+		return self::getByColumnEqual(self::getPkField(), $colValue);
+	}
+
+	private function getConnection(){
+		return mysqli_connect(
+			'localhost', //Database server
+			'admin_survey', //Database user
+			'survey', //Database password
+			'admin_survey' //Database name
+			);
 	}
 
 	private static function getArgsList($method = '__construct'){

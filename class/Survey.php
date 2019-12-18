@@ -16,7 +16,7 @@ class Survey {
 	}
 
 	public static function verifyUser($username, $password){
-		require('mysql.php');
+		$con = mysqli_connect('localhost','admin_survey','survey','admin_survey');
 		$escapedUsername = self::escapeInput($username); //Escape username for database query
 		$row = mysqli_query($con, "SELECT username, password FROM users WHERE username='$escapedUsername'");
 		$row = mysqli_fetch_array($row);
