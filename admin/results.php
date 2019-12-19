@@ -27,12 +27,6 @@ $questions = $survey->getQuestions();
 		<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 		<script type="text/javascript" src="../includes/vue.js"></script>
 		<style>
-		/* Bellow is the styling for the title of the page. This is not required...*/
-		.title{
-			font-weight: bolder;
-			font-size: 500%;
-			margin-bottom: 30px;
-		}
 		.containter-fluid{
 			margin-top:20px;
 		}
@@ -49,17 +43,9 @@ $questions = $survey->getQuestions();
 		html, body {
 			overflow-x: hidden;
 		}
-		#new_question{
-			display:none;
-		}
-		.questionOption{
-			margin-bottom:10px;
-		}
-		.showMore, .showLess{
-			cursor: pointer;
-		}
-		#new_choice{
-			cursor: pointer;
+		h4{
+			text-align: center;
+			margin-bottom: 20px;
 		}
 		#settings{
 			display:none;
@@ -99,13 +85,28 @@ $questions = $survey->getQuestions();
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
 					<div class="card border-secondary mb-3">
-					  <div class="card-header">{{ question.title }} <small>{{ fullType(question.type) }}</small></div>
+					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small></div>
 					  <div class="card-body">
-					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>'">
-					    	Yes or no
-					    </template>
-					    <template v-if="question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
+					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>' || question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
+					    	<h4>{{ question.title }}</h4>
 					    	<canvas :id="question.pk" v-bind:index="index" class="pieChart"></canvas>
+					    </template>
+					    <template v-if="question.type == '<?=Question::TYPE_SLIDER?>'">
+					    	<h4>{{ question.title }}</h4>
+					    	<div class="row" style="text-align:center">
+					    		<div class="col-sm-3">
+					    			<span>{{ min(index) }}</span>
+					    			<h6>MIN</h6>
+					    		</div>
+					    		<div class="col-sm-6">
+					    			<span>{{ mean(index) }}</span>
+					    			<h5>AVERAGE</h5>
+					    		</div>
+					    		<div class="col-sm-3">
+					    			<span>{{ max(index) }}</span>
+					    			<h6>MAX</h6>
+					    		</div>
+					    	</div>
 					    </template>
 					  </div>
 					</div>
@@ -174,7 +175,7 @@ $questions = $survey->getQuestions();
         		surveyEmail: "<?= $survey->email ?>"
         	},
         	computed: {
-        		
+
         	},
         	methods: {
         		fullType: function(input){
@@ -196,11 +197,47 @@ $questions = $survey->getQuestions();
 						default:
 							return 'unknown question type';
 					}
-				}
+				},
+				min: function(question_index){
+        			var min = '';
+        			for (var i = 0; i < this.questions[question_index].responses.length; i++) {
+        				if(min == ''){
+        					min = parseInt(this.questions[question_index].responses[i].response);
+        				}else{
+        					if(min > parseInt(this.questions[question_index].responses[i].response)){
+        						min = parseInt(this.questions[question_index].responses[i].response);
+        					}
+        				}
+        			};
+        			return min;
+        		},
+        		max: function(question_index){
+        			var max = '';
+        			for (var i = 0; i < this.questions[question_index].responses.length; i++) {
+        				if(max == ''){
+        					max = parseInt(this.questions[question_index].responses[i].response);
+        				}else{
+        					if(max < parseInt(this.questions[question_index].responses[i].response)){
+        						max = parseInt(this.questions[question_index].responses[i].response);
+        					}
+        				}
+        			};
+        			return max;
+        		},
+        		mean: function(question_index){
+        			var total = 0.00;
+        			for (var i = 0; i < this.questions[question_index].responses.length; i++) {
+        				if(!isNaN(this.questions[question_index].responses[i].response) && this.questions[question_index].responses[i].response != ''){
+        					total += parseFloat(this.questions[question_index].responses[i].response);
+        				}
+        			};
+        			
+        			return (total / this.questions[question_index].responses.length).toFixed(2);
+        		}
         	},
         	mounted: function(){
         		// chart colors
-				var colors = ['#007bff','#28a745','#333333','#c3e6cb','#dc3545','#6c757d'];
+				var colors = ['#28a745', '#007bff','#333333','#c3e6cb','#dc3545','#6c757d'];
 
 				/* 3 donut charts */
 				var donutOptions = {
@@ -212,7 +249,11 @@ $questions = $survey->getQuestions();
 				for (var i = 0; i < charts.length; i++) {
 					//Get the data from Vue
 					var question_index = charts[i].getAttribute('index');
-					var data = {};
+					if(this.questions[question_index].type == '<?= Question::TYPE_YESORNO?>'){
+						var data = {'Yes': 0, 'No': 0}; //Sets uniform position/color of yes and no pie slices
+					}else{
+						var data = {};
+					}
 					for (var j = 0; j < this.questions[question_index].responses.length; j++) {
 						if(data[this.questions[question_index].responses[j].response] == undefined){
 							data[this.questions[question_index].responses[j].response] = 1;
