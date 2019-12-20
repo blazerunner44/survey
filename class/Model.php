@@ -1,14 +1,19 @@
 <?php 
-
+require_once __DIR__ . '/BuilderContainer.php';
 abstract class Model{
 	public $pk;
 
-	public static function getAll(){
-		$con = self::getConnection();
+	public static function all(){
+		$columns = self::getArgsList();
+		array_unshift($columns, self::getPkField());
+		$builder = new BuilderContainer(get_called_class(), self::getTableName());
+		return $builder->setColumns($columns);
+	}
 
+	public static function get($query){
+		$con = self::getConnection();
 		$list = array();
-		
-		$query = "SELECT " . self::getPkField() . ',' . self::getArgsList() . " FROM " . self::getTableName();
+
 		$result = $con->query($query);
 		if(!$result){
 			throw new Exception("Error executing query " . $query, 1);
@@ -55,15 +60,13 @@ abstract class Model{
 	}
 
 	private static function getArgsList($method = '__construct'){
-		$string = '';
+		$list = array();
 		$r = new ReflectionMethod(get_called_class(), $method);
 		$params = $r->getParameters();
 		foreach ($params as $param) {
-		    //$param is an instance of ReflectionParameter
-		    $string .= $param->getName() . ',';
+		    array_push($list, $param->getName());
 		}
-		$string = rtrim($string, ',');
-		return $string;
+		return $list;
 	}
 
 	private static function getTableName(){

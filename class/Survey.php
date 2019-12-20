@@ -50,7 +50,7 @@ class Survey {
 		mysqli_query($con, "UPDATE settings SET value='$value' WHERE name='$valueName'");
 	}
 	public function getQuestions(){
-		return Question::getAll();
+		return Question::all()->get();
 	}
 }
 ?>

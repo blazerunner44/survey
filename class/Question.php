@@ -28,7 +28,7 @@ class Question extends Model{
 		$this->pos = $pos;
 
 		$this->choices = json_decode($choices);
-		$this->responses = Response::getByColumnEqual('question_id', $id);
+		$this->responses = Response::all()->equals('question_id', $id)->get();
 	}
 
 	public function getResponses(){

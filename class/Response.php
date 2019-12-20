@@ -13,9 +13,7 @@ class Response extends Model{
 
 	public function __construct($question_id, $response, $session_token){
 		$this->question_id = $question_id;
-		$this->response = $response;
+		$this->response = stripslashes($response);
 		$this->session_token = $session_token;
 	}
-
-	
 }

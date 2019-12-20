@@ -34,11 +34,6 @@ $questions = $survey->getQuestions();
 			text-decoration: none;
 			font-size:18px;
 		}
-		span {
-			font-size: 18px;
-			word-spacing: -12;
-			text-transform: none;
-		}
 		/*Prevents the horizontal scroll bar (this is a bootstrap bug)*/
 		html, body {
 			overflow-x: hidden;
@@ -68,6 +63,9 @@ $questions = $survey->getQuestions();
 		    text-decoration: none;
 		    cursor: pointer;
 			z-index: 10;
+		}
+		.textResponseCard{
+			font-size: 12pt;
 		}
 		</style>
 
@@ -107,6 +105,19 @@ $questions = $survey->getQuestions();
 					    			<h6>MAX</h6>
 					    		</div>
 					    	</div>
+					    </template>
+					    <template v-if="question.type == '<?=Question::TYPE_TEXT?>' || question.type == '<?=Question::TYPE_PARAGRAPH?>'">
+							<h4>{{ question.title }}</h4>
+							<div class="card">
+								<ul class="list-group list-group-flush" :key="pageKey">
+									<li class="list-group-item textResponseCard" v-for="(response, rindex) in getPaginatedResponses(index)">{{ response.response }}</li>
+								</ul>
+							</div>
+							<div style="text-align:center; margin-top: 15px;">
+								<button class="btn btn-light" v-on:click="prevPage(index)"><< Prev</button>
+								<span style="margin: 0 10px">{{ question.currentPage }} of {{ question.pageCount }}</span>
+								<button class="btn btn-light" v-on:click="nextPage(index)">Next >></button>
+							</div>
 					    </template>
 					  </div>
 					</div>
@@ -169,6 +180,7 @@ $questions = $survey->getQuestions();
 		var app = new Vue({
         	el: '#app',
         	data: {
+        		pageKey: 0,
         		questions: <?php echo json_encode($questions); ?>,
         		surveyTitle: "<?= $survey->name ?>",
         		surveyDescription: "<?= $survey->description ?>",
@@ -233,14 +245,51 @@ $questions = $survey->getQuestions();
         			};
         			
         			return (total / this.questions[question_index].responses.length).toFixed(2);
+        		},
+        		getPaginatedResponses: function(question_index){
+        			let currentPage = this.questions[question_index].currentPage;
+        			let pageSize = this.questions[question_index].pageSize;
+
+        			let end = currentPage * pageSize;
+        			let start = end - pageSize;
+
+        			if(end > this.questions[question_index].responses.length){
+        				end = this.questions[question_index].responses.length
+        			}
+
+        			return this.questions[question_index].responses.slice(start,end);
+        		},
+        		nextPage: function(question_index){
+        			this.questions[question_index].currentPage++;
+        			if(this.questions[question_index].currentPage > this.questions[question_index].pageCount){
+        				this.questions[question_index].currentPage = 1;
+        			}
+        			this.pageKey++;
+        		},
+        		prevPage: function(question_index){
+        			this.questions[question_index].currentPage--;
+        			if(this.questions[question_index].currentPage < 1){
+        				this.questions[question_index].currentPage = this.questions[question_index].pageCount;
+        			}
+        			this.pageKey++;
         		}
         	},
+        	created: function(){
+        		//Setup additional variables for pagination questions
+        		const PAGE_SIZE = 5;
+        		for (var i = 0; i < this.questions.length; i++) {
+        			if(this.questions[i].type == '<?=Question::TYPE_TEXT?>' || this.questions[i].type == '<?=Question::TYPE_PARAGRAPH?>'){
+        				this.questions[i].pageSize = PAGE_SIZE;
+        				this.questions[i].currentPage = 1;
+        				this.questions[i].pageCount = Math.ceil(this.questions[i].responses.length / PAGE_SIZE);
+        			}
+        		};
+        	},
         	mounted: function(){
-        		// chart colors
+        		// Setup Pie charts
 				var colors = ['#28a745', '#007bff','#333333','#c3e6cb','#dc3545','#6c757d'];
 
-				/* 3 donut charts */
-				var donutOptions = {
+				var chartOptions = {
 				  cutoutPercentage: 50, 
 				  legend: {position:'bottom', padding:5, labels: {pointStyle:'circle', usePointStyle:true}}
 				};
@@ -276,7 +325,7 @@ $questions = $survey->getQuestions();
 					  new Chart(charts[i], {
 					      type: 'pie',
 					      data: chartData,
-					      options: donutOptions
+					      options: chartOptions
 					  });
 					}
 				};

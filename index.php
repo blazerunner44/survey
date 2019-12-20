@@ -4,9 +4,9 @@ require 'class/Survey.php';
 
 require_once('mysql.php');
 $survey = new Survey();
+$questions = Question::all();
 $questions = $survey->getQuestions();
-// var_dump($questions);
-// exit;
+
 ?>
 
 <!DOCTYPE html>
