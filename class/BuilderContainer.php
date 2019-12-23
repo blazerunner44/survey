@@ -5,21 +5,57 @@ class BuilderContainer{
 	private $builder;
 	private $query;
 	private $modelObject;
+	private $tableName;
 
 	public function __construct($modelObject, $tableName){
 		$this->builder = new GenericBuilder();
-		$this->query = $this->builder->select()->setTable($tableName);
+		$this->tableName = $tableName;
 		$this->modelObject = $modelObject;
 	}
 
-	public function get(){
+	public function select(){
+		$this->query = $this->builder->select()->setTable($this->tableName);
+		return $this;
+	}
+
+	public function insert(){
+		$this->query = $this->builder->insert()->setTable($this->tableName);
+		return $this;
+	}
+
+	public function setValues($values){
+		$this->query->setValues($values);
+		return $this;
+	}
+
+	public function getQueryString(){
 		$query = $this->builder->write($this->query);
 		$values = $this->builder->getValues();
 
+		$query = str_replace($this->tableName . '.', '', $query);
+
 		foreach($values as $key => $value){
-		    $query = str_replace($key, addslashes($value), $query);
+			switch (gettype($value)) {
+				case 'string':
+					$value = '"' . addslashes($value) . '"';
+					break;
+				case 'NULL':
+					$value = '';
+					break;
+				case 'integer':
+					break;
+				default:
+					$value = addslashes($value);
+					break;
+			}
+		    $query = str_replace($key, $value, $query);
 		}
 
+		return $query;
+	}
+
+	public function get(){
+		$query = $this->getQueryString();
 		return $this->modelObject::get($query);
 	}
 

@@ -7,7 +7,7 @@ abstract class Model{
 		$columns = self::getArgsList();
 		array_unshift($columns, self::getPkField());
 		$builder = new BuilderContainer(get_called_class(), self::getTableName());
-		return $builder->setColumns($columns);
+		return $builder->select()->setColumns($columns);
 	}
 
 	public static function get($query){
@@ -48,6 +48,38 @@ abstract class Model{
 
 	public static function getByPkEqual($colValue){
 		return self::getByColumnEqual(self::getPkField(), $colValue);
+	}
+
+	public function serialize(){
+		$array = array();
+		foreach (self::getArgsList() as $column) {
+			if(!empty($this->{$column})){
+				if(gettype($this->{$column}) == 'array'){
+					$array[$column] = json_encode($this->{$column});
+				}else{
+					$array[$column] = $this->{$column};
+				}
+			}
+		}
+		return $array;
+	}
+
+	public function save(){
+		$builder = new BuilderContainer(get_called_class(), self::getTableName());
+		$con = self::getConnection();
+
+		if(!empty($this->{self::getPkField()})){ //This record needs to be updated
+
+		}else{ //This record needs to be inserted
+			$query = $builder->insert()->setValues($this->serialize());
+			$query = $query->getQueryString();
+			if($result = $con->query($query)){
+				$this->{self::getPkField()} = $con->insert_id;
+				$this->pk = $con->insert_id;
+			}else{
+				throw new Exception("Error executing query: " . $query, 1);
+			}
+		}
 	}
 
 	private function getConnection(){

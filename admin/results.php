@@ -89,7 +89,10 @@ $questions = $survey->getQuestions();
 					    	<h4>{{ question.title }}</h4>
 					    	<canvas :id="question.pk" v-bind:index="index" class="pieChart"></canvas>
 					    </template>
-					    <template v-if="question.type == '<?=Question::TYPE_SLIDER?>'">
+					    <template v-if="question.responses.length < 1">
+					    	<p>No Responses</p>
+					    </template>
+					    <template v-else-if="question.type == '<?=Question::TYPE_SLIDER?>'">
 					    	<h4>{{ question.title }}</h4>
 					    	<div class="row" style="text-align:center">
 					    		<div class="col-sm-3">
@@ -106,7 +109,7 @@ $questions = $survey->getQuestions();
 					    		</div>
 					    	</div>
 					    </template>
-					    <template v-if="question.type == '<?=Question::TYPE_TEXT?>' || question.type == '<?=Question::TYPE_PARAGRAPH?>'">
+					    <template v-else-if="question.type == '<?=Question::TYPE_TEXT?>' || question.type == '<?=Question::TYPE_PARAGRAPH?>'">
 							<h4>{{ question.title }}</h4>
 							<div class="card">
 								<ul class="list-group list-group-flush" :key="pageKey">
@@ -119,6 +122,49 @@ $questions = $survey->getQuestions();
 								<button class="btn btn-light" v-on:click="nextPage(index)">Next >></button>
 							</div>
 					    </template>
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<div class="card border-secondary mb-3">
+					  <div class="card-header">New Question</div>
+					  <div class="card-body">
+					    <form id="newQuestionForm">
+					    	<div class="form-group">
+					    		<label>Question Title</label>
+					    		<input type="text" class="form-control" name="title" v-model="newQuestionTitle">
+					    	</div>
+					    	<div class="form-group">
+					    		<label>Question Description</label>
+					    		<input type="text" class="form-control" name="description" v-model="newQuestionDescription">
+					    	</div>
+					    	<div class="form-group">
+					    		<label>Question Type</label>
+					    		<select class="form-control" name="type" id="newQuestionType" v-model="newQuestionType">
+					    			<option value="<?=Question::TYPE_YESORNO?>"></option>
+					    			<option value="<?=Question::TYPE_OPTION?>"></option>
+					    			<option value="<?=Question::TYPE_EXPANDED_OPTION?>"></option>
+					    			<option value="<?=Question::TYPE_CHECKBOX?>"></option>
+					    			<option value="<?=Question::TYPE_SLIDER?>"></option>
+					    			<option value="<?=Question::TYPE_TEXT?>"></option>
+					    			<option value="<?=Question::TYPE_PARAGRAPH?>"></option>
+					    		</select>
+					    	</div>
+					    	<div class="form-group" style="width:90%; margin-left:5%" v-if="newQuestionType == '<?=Question::TYPE_OPTION?>' || newQuestionType == '<?=Question::TYPE_EXPANDED_OPTION?>' || newQuestionType == '<?=Question::TYPE_CHECKBOX?>'">
+					    		<label>Choices</label>
+					    		<div v-for="(choice, choiceIndex) in newQuestionChoices" style="margin-bottom:25px">
+					    			<input type="text" class="form-control" style="width:85%; float:left;" v-model="newQuestionChoices[choiceIndex]" placeholder="Choice"><a href="javascript:void(0);" v-on:click="removeNewQuestionChoice(choiceIndex)" style="float:left; margin-left:1%">Remove</a><br>
+					    		</div>
+					    		<br>
+					    		<a href="javascript:void(0);" style="clear:left" v-on:click="addNewQuestionChoice()">+ Add Choice</a>
+					    	</div>
+
+					    	<button type="button" class="btn btn-primary float-right" v-on:click="createQuestion()">Create Question >></button>
 					  </div>
 					</div>
 				</div>
@@ -184,7 +230,11 @@ $questions = $survey->getQuestions();
         		questions: <?php echo json_encode($questions); ?>,
         		surveyTitle: "<?= $survey->name ?>",
         		surveyDescription: "<?= $survey->description ?>",
-        		surveyEmail: "<?= $survey->email ?>"
+        		surveyEmail: "<?= $survey->email ?>",
+        		newQuestionTitle: '',
+        		newQuestionDescription: '',
+        		newQuestionType: '<?=Question::TYPE_YESORNO?>',
+        		newQuestionChoices: ['']
         	},
         	computed: {
 
@@ -272,6 +322,35 @@ $questions = $survey->getQuestions();
         				this.questions[question_index].currentPage = this.questions[question_index].pageCount;
         			}
         			this.pageKey++;
+        		},
+        		createQuestion: function(){
+        			var newQuestion = {
+        				'title': this.newQuestionTitle,
+        				'description': this.newQuestionDescription,
+        				'type': this.newQuestionType,
+        				'choices': JSON.stringify(this.newQuestionChoices),
+        				'responses': []
+        			}
+
+        			const formData = new FormData();
+				    Object.keys(newQuestion).forEach(key => formData.append(key, newQuestion[key]));
+        			var vue = this;
+        			fetch('create_question.php', {
+						method: 'post',
+						body: formData
+					}).then(function(){
+						vue.questions.push(newQuestion);
+						vue.newQuestionTitle = '';
+						vue.newQuestionDescription = '';
+						vue.newQuestionType = 'yn';
+						vue.newQuestionChoices = [''];
+					})
+        		},
+        		addNewQuestionChoice: function(){
+        			this.newQuestionChoices.push('');
+        		},
+        		removeNewQuestionChoice: function(index){
+        			this.newQuestionChoices.splice(index, 1);
         		}
         	},
         	created: function(){
@@ -328,6 +407,12 @@ $questions = $survey->getQuestions();
 					      options: chartOptions
 					  });
 					}
+				};
+
+				//Fill in new question types
+				var options = document.getElementById("newQuestionType").children;
+				for (var i = 0; i < options.length; i++) {
+					options[i].innerHTML = this.fullType(options[i].getAttribute('value'));
 				};
         	}
 	    });

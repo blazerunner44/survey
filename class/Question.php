@@ -9,7 +9,7 @@ class Question extends Model{
 	public $pos;
 	public $responses;
 
-	private $choices = array();
+	protected $choices = array();
 
 	const tableName = 'questions';
 
