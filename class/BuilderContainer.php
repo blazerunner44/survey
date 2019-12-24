@@ -28,6 +28,11 @@ class BuilderContainer{
 		return $this;
 	}
 
+	public function delete(){
+		$this->query = $this->builder->delete()->setTable($this->tableName);
+		return $this;
+	}
+
 	public function setValues($values){
 		$this->query->setValues($values);
 		return $this;

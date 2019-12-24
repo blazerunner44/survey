@@ -1,10 +1,5 @@
 <?php
-require_once('Question.php');
 require('../mysql.php');
-
-ini_set('display_errors',1);
-ini_set('display_startup_errors',1);
-error_reporting(-1); 
 
 //Prepared statement for DB
 $stmt = mysqli_prepare($con, "UPDATE settings SET value=? WHERE name=?");

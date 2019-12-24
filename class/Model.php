@@ -64,7 +64,7 @@ abstract class Model{
 		if(!empty($this->pk)){ //This record needs to be updated
 			$query = $builder->update()->setValues($this->serialize())->equals(self::getPkField(), $this->pk);
 			$query = $query->getQueryString();
-			
+
 			if($result = $con->query($query)){
 				return true;
 			}else{
@@ -83,13 +83,27 @@ abstract class Model{
 		}
 	}
 
-	private function getConnection(){
+	public function delete(){
+		$builder = new BuilderContainer(get_called_class(), self::getTableName());
+		$con = self::getConnection();
+
+		$query = $builder->delete()->equals(self::getPkField(), $this->pk);
+		$query = $query->getQueryString();
+
+		if($result = $con->query($query)){
+			return true;
+		}else{
+			throw new Exception("Error executing query: " . $query, 1);
+		}
+	}
+
+	public function getConnection(){
 		return mysqli_connect(
 			'localhost', //Database server
 			'admin_survey', //Database user
 			'survey', //Database password
 			'admin_survey' //Database name
-			);
+		);
 	}
 
 	private static function getArgsList($method = '__construct'){

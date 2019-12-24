@@ -1,7 +1,4 @@
 <?php 
-// ini_set('display_errors',1);
-// ini_set('display_startup_errors',1);
-// error_reporting(-1); 
 session_start();
 require_once '../mysql.php';
 require '../class/Survey.php';
@@ -83,7 +80,7 @@ $questions = $survey->getQuestions();
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
 					<div class="card border-secondary mb-3">
-					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small><button v-on:click="editQuestion(index)" class="btn btn-primary float-right">Edit</button><button v-on:click="" class="btn btn-danger float-right" style="margin-right:10px">Delete</button></div>
+					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small><button v-on:click="editQuestion(index)" class="btn btn-primary float-right">Edit</button><button v-on:click="deleteQuestion(index)" class="btn btn-danger float-right" style="margin-right:10px">Delete</button></div>
 					  <div class="card-body">
 					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>' || question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
 					    	<h4>{{ question.title }}</h4>
@@ -174,15 +171,18 @@ $questions = $survey->getQuestions();
 
 			<div id="settings" class="container">
 				<a id="closeSettings" onclick="$('#settings').hide();$('html').css('overflow', 'scroll');">X</a>
-				<div class="col-sm-12 col-md-10 col-md-offset-2">
-					<h1>Settings</h1>
-					<hr>
-					<form action="updateSettings.php" method="POST">
-						<input name="name" class="form-control" placeholder="Survey Name" value="<?= $survey->name; ?>"/>
-						<input name="email" class="form-control" placeholder="Survey Email" value="<?= $survey->email; ?>" />
-						<textarea name="description" class="form-control" placeholder="Survey Description" rows="10"><?= $survey->description; ?></textarea>
-						<button type="submit" class="btn btn-primary" style="float:right"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-					</form>
+				<div class="row">
+					<div class="col-sm-4"></div>
+					<div class="col-sm-6" style="text-align:center">
+						<h1>Settings</h1>
+						<hr>
+						<form action="updateSettings.php" method="POST">
+							<input name="name" class="form-control" placeholder="Survey Name" value="<?= $survey->name; ?>"/>
+							<input name="email" class="form-control" placeholder="Survey Email" value="<?= $survey->email; ?>" />
+							<textarea name="description" class="form-control" placeholder="Survey Description" rows="10"><?= $survey->description; ?></textarea>
+							<button type="submit" class="btn btn-primary" style="float:right"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+						</form>
+					</div>
 				</div>
 			</div>
 
@@ -409,6 +409,31 @@ $questions = $survey->getQuestions();
 							$("#editQuestion").modal("hide");
 						}else{
 							alert('Error updating question! ');
+						}
+					})
+        		},
+        		deleteQuestion: function(index){
+        			if(!confirm("Are you sure you want to delete this question and all associated responses?")){
+        				return false;
+        			}
+        			var form = {
+        				'id': this.questions[index].pk,
+        			}
+
+        			const formData = new FormData();
+				    Object.keys(form).forEach(key => formData.append(key, form[key]));
+        			var vue = this;
+        			var questionIndex = index;
+        			fetch('delete_question.php', {
+						method: 'post',
+						body: formData
+					})
+					.then((resp) => resp.text())
+					.then(function(data){
+						if(data == 'success'){
+							vue.questions.splice(questionIndex, 1);
+						}else{
+							alert('Error deleting question! ');
 						}
 					})
         		}
