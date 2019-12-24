@@ -23,6 +23,11 @@ class BuilderContainer{
 		return $this;
 	}
 
+	public function update(){
+		$this->query = $this->builder->update()->setTable($this->tableName);
+		return $this;
+	}
+
 	public function setValues($values){
 		$this->query->setValues($values);
 		return $this;

@@ -83,7 +83,7 @@ $questions = $survey->getQuestions();
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
 					<div class="card border-secondary mb-3">
-					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small></div>
+					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small><button v-on:click="editQuestion(index)" class="btn btn-primary float-right">Edit</button><button v-on:click="" class="btn btn-danger float-right" style="margin-right:10px">Delete</button></div>
 					  <div class="card-body">
 					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>' || question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
 					    	<h4>{{ question.title }}</h4>
@@ -145,7 +145,7 @@ $questions = $survey->getQuestions();
 					    	</div>
 					    	<div class="form-group">
 					    		<label>Question Type</label>
-					    		<select class="form-control" name="type" id="newQuestionType" v-model="newQuestionType">
+					    		<select class="form-control newQuestionType" name="type" v-model="newQuestionType">
 					    			<option value="<?=Question::TYPE_YESORNO?>"></option>
 					    			<option value="<?=Question::TYPE_OPTION?>"></option>
 					    			<option value="<?=Question::TYPE_EXPANDED_OPTION?>"></option>
@@ -165,6 +165,7 @@ $questions = $survey->getQuestions();
 					    	</div>
 
 					    	<button type="button" class="btn btn-primary float-right" v-on:click="createQuestion()">Create Question >></button>
+					  	</form>
 					  </div>
 					</div>
 				</div>
@@ -185,38 +186,50 @@ $questions = $survey->getQuestions();
 				</div>
 			</div>
 
-			<!-- Modal -->
-			<div class="modal fade" id="editQuestion" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-			  <div class="modal-dialog modal-sm">
+			<div class="modal" id="editQuestion" tabindex="-1" role="dialog">
+			  <div class="modal-dialog" role="document">
 			    <div class="modal-content">
 			      <div class="modal-header">
-			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+			        <h5 class="modal-title">Edit Question</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
 			      </div>
 			      <div class="modal-body">
-			      <form id="editQuestionForm">
-			      	<input type="hidden" name="questionId" id="editQuestionId" />
-					  <div class="form-group">
-					    <label for="questionName">Question Name</label>
-					    <input type="text" class="form-control" id="questionName" name="questionName">
-					  </div>
-					  <div class="form-group">
-					    <label for="questionDescription">Question Description</label>
-					    <input type="text" class="form-control" id="questionDescription" name="questionDescription">
-					  </div>
-					  <div class="form-group">
-					    <label for="questionPos">Question Position</label>
-					    <input type="text" class="form-control" id="questionPos" name="questionPos">
-					  </div>
-					  <div class="form-group">
-					    <label for="questionOption">Question Options</label>
-					    <div id="options"></div>
-					  </div>
-					</form>
+			        <form id="newQuestionForm">
+					    	<div class="form-group">
+					    		<label>Question Title</label>
+					    		<input type="text" class="form-control" name="title" v-model="tempEditQuestion.title">
+					    	</div>
+					    	<div class="form-group">
+					    		<label>Question Description</label>
+					    		<input type="text" class="form-control" name="description" v-model="tempEditQuestion.description">
+					    	</div>
+					    	<div class="form-group">
+					    		<label>Question Type</label>
+					    		<select class="form-control newQuestionType" disabled name="type" v-bind:value="tempEditQuestion.type">
+					    			<option value="<?=Question::TYPE_YESORNO?>"></option>
+					    			<option value="<?=Question::TYPE_OPTION?>"></option>
+					    			<option value="<?=Question::TYPE_EXPANDED_OPTION?>"></option>
+					    			<option value="<?=Question::TYPE_CHECKBOX?>"></option>
+					    			<option value="<?=Question::TYPE_SLIDER?>"></option>
+					    			<option value="<?=Question::TYPE_TEXT?>"></option>
+					    			<option value="<?=Question::TYPE_PARAGRAPH?>"></option>
+					    		</select>
+					    	</div>
+					    	<div class="form-group" style="width:90%; margin-left:5%" v-if="tempEditQuestion.type == '<?=Question::TYPE_OPTION?>' || tempEditQuestion.type == '<?=Question::TYPE_EXPANDED_OPTION?>' || tempEditQuestion.type == '<?=Question::TYPE_CHECKBOX?>'">
+					    		<label>Choices</label>
+					    		<div v-for="(choice, choiceIndex) in tempEditQuestion.choices" style="margin-bottom:25px">
+					    			<input type="text" class="form-control" style="width:85%; float:left;" v-model="tempEditQuestion.choices[choiceIndex]" placeholder="Choice"><a href="javascript:void(0);" v-on:click="removeEditQuestionChoice(choiceIndex)" style="float:left; margin-left:1%">Remove</a><br>
+					    		</div>
+					    		<br>
+					    		<a href="javascript:void(0);" style="clear:left" v-on:click="addEditQuestionChoice()">+ Add Choice</a>
+					    	</div>
+					  	</form>
 			      </div>
 			      <div class="modal-footer">
-			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			        <button type="button" id="saveEdit" class="btn btn-primary">Save changes</button>
+			        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			        <button type="button" class="btn btn-primary" v-on:click="saveEditQuestion()">Save changes</button>
 			      </div>
 			    </div>
 			  </div>
@@ -234,7 +247,13 @@ $questions = $survey->getQuestions();
         		newQuestionTitle: '',
         		newQuestionDescription: '',
         		newQuestionType: '<?=Question::TYPE_YESORNO?>',
-        		newQuestionChoices: ['']
+        		newQuestionChoices: [''],
+        		tempEditIndex: 0,
+        		tempEditQuestion: {
+        			'title': '',
+        			'description': '',
+        			'choices': [],
+        		}
         	},
         	computed: {
 
@@ -351,6 +370,47 @@ $questions = $survey->getQuestions();
         		},
         		removeNewQuestionChoice: function(index){
         			this.newQuestionChoices.splice(index, 1);
+        		},
+        		addEditQuestionChoice: function(){
+        			this.questions[this.editQuestionIndex].choices.push('');
+        		},
+        		removeEditQuestionChoice: function(index){
+        			this.questions[this.editQuestionIndex].choices.splice(index, 1);
+        		},
+        		editQuestion: function(index){
+        			this.tempEditIndex = index;
+        			this.tempEditQuestion = JSON.parse(JSON.stringify(this.questions[index]));
+        			$("#editQuestion").modal("show");
+        		},
+        		saveEditQuestion: function(){
+        			var newQuestion = {
+        				'id': this.tempEditQuestion.pk,
+        				'title': this.tempEditQuestion.title,
+        				'description': this.tempEditQuestion.description,
+        				'type': this.tempEditQuestion.type,
+        				'choices': JSON.stringify(this.tempEditQuestion.choices),
+        				'responses': []
+        			}
+
+        			const formData = new FormData();
+				    Object.keys(newQuestion).forEach(key => formData.append(key, newQuestion[key]));
+        			var vue = this;
+        			fetch('update_question.php', {
+						method: 'post',
+						body: formData
+					})
+					.then((resp) => resp.text())
+					.then(function(data){
+						if(data == 'success'){
+							vue.questions[vue.tempEditIndex].title = vue.tempEditQuestion.title;
+							vue.questions[vue.tempEditIndex].description = vue.tempEditQuestion.description;
+							vue.questions[vue.tempEditIndex].type = vue.tempEditQuestion.type;
+							vue.questions[vue.tempEditIndex].choices = vue.tempEditQuestion.choices;
+							$("#editQuestion").modal("hide");
+						}else{
+							alert('Error updating question! ');
+						}
+					})
         		}
         	},
         	created: function(){
@@ -410,13 +470,15 @@ $questions = $survey->getQuestions();
 				};
 
 				//Fill in new question types
-				var options = document.getElementById("newQuestionType").children;
-				for (var i = 0; i < options.length; i++) {
-					options[i].innerHTML = this.fullType(options[i].getAttribute('value'));
+				var selects = document.getElementsByClassName("newQuestionType");
+				for (var i = 0; i < selects.length; i++) {
+					var options = selects[i].children;
+					for (var j = 0; j < options.length; j++) {
+						options[j].innerHTML = this.fullType(options[j].getAttribute('value'));
+					};
 				};
         	}
 	    });
 		</script>
-
 	</body>
 </html>
