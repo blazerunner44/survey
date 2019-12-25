@@ -1,6 +1,7 @@
 <?php
-require 'class/Question.php';
-require 'class/Survey.php';
+require_once 'class/Question.php';
+require_once 'class/Response.php';
+require_once 'class/Survey.php';
 
 require_once('mysql.php');
 $survey = new Survey();
@@ -33,6 +34,10 @@ label {
 .container p {
 	margin-top: 20px;
 }
+.form-check-label{
+  font-size: 12pt;
+  margin-top: -10px;
+}
 </style>
 </head>
 
@@ -42,47 +47,45 @@ label {
 
 <div class="container">
 	<div class="row">
-      <h1><?php echo $survey->name; ?></h1>
+    <h1><?php echo $survey->name; ?></h1>
 	  <p><?php echo $survey->description; ?></p>
 	  <hr>
-    	<?php
-		if (reset($_POST)) { //If first element in array is true
-			require('mysql.php');
-			//Insert Feedback to database
-      // foreach($_POST as $var => $val)
-      // {
-      //    $_POST[$var] = mysqli_real_escape_string($con, $val);
-      // }
-      $_POST = Survey::escapeInput($_POST);
+    <?php
+		if (!empty($_POST)) {
+			
+			$sessionToken = substr(md5(rand()), 0, 10);
 
-			$rand = substr(md5(rand()), 0, 10);
-
-      //Prepared statement for DB
-      $stmt = mysqli_prepare($con, "INSERT INTO results (question_id,response,session_token) VALUES (?,?,'$rand')");
-			foreach($_POST as $key=>$response){
-				$bind = mysqli_stmt_bind_param($stmt, "is", $key, $response);
-        mysqli_stmt_execute($stmt);
+			foreach($_POST as $questionId=>$responseValue){
+        if(is_array($responseValue)){
+          foreach ($responseValue as $checkboxResponseValue) {
+            $response = new Response($questionId, $checkboxResponseValue, $sessionToken);
+            $response->save();
+          }
+        }else{
+  				$response = new Response($questionId, $responseValue, $sessionToken);
+          $response->save();
+        }
 			}
-      mysqli_stmt_close($stmt);
 
 			// //Send email with feedback to admin
 			$emailMessage="<h3>Survey Submitted</h3>";
-      $result = mysqli_query($con, "SELECT * FROM questions ORDER BY pos ASC");
-      while($row = mysqli_fetch_array($result)){
-        $num = $row['id'];
-        $emailMessage.="<b>{$row[question]}</b><p>" .stripslashes($_POST[$num]) ."</p>";
+      foreach ($questions as $question) {
+        if(is_array($_POST[$question->pk])){
+          $responseValue = implode(' | ', $_POST[$question->pk]);
+        }else{
+          $responseValue = $_POST[$question->pk];
+        }
+        $emailMessage.="<b>{$question->title}</b><p>" . htmlentities($responseValue) ."</p>";
       }
+        
 			$emailMessage.="<hr>";
 			$headers  = 'MIME-Version: 1.0' . "\r\n";
 			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 			$headers .= "From: no-reply <{$survey->email}>";
 			mail($survey->email, $survey->name.' Submission', $emailMessage, $headers);
-			// //Log the feedback received
-
-			mysqli_close($con);
 			
-			echo '<div class="success bg-success" style="height:50px; padding-top:10px; padding-left:30px; font-size:16px">Thank you for your feedback. It is greatly appriciated!</div>';
-		  
+			echo '</div><div class="alert alert-success" style="height:50px; padding-top:10px; padding-left:30px; font-size:16px">Thank you for your feedback. It is greatly appriciated!</div>';
+		  exit;
     }
 		?>
     </div>

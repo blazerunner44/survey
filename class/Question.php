@@ -96,7 +96,12 @@ class Question extends Model{
 
 			        <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>";
 		        	foreach($this->choices as $choice){
-		        		$return .= "<input type='checkbox' name='{$this->pk}[]'>{$choice}</option>";
+		        		$return .= "<div class='form-check'>
+						  <input class='form-check-input' id='{$this->pk}_{$choice}' type='checkbox' name='{$this->pk}[]' value='{$choice}'>
+						  <label class='form-check-label' for='{$this->pk}_{$choice}'>
+						    {$choice}
+						  </label>
+						</div>";
 		        	}
 
 			        $return .= "</div>";

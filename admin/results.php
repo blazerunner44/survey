@@ -82,7 +82,7 @@ $questions = $survey->getQuestions();
 					<div class="card border-secondary mb-3">
 					  <div class="card-header">Question {{ index+1 }} <small>{{ fullType(question.type) }}</small><button v-on:click="editQuestion(index)" class="btn btn-primary float-right">Edit</button><button v-on:click="deleteQuestion(index)" class="btn btn-danger float-right" style="margin-right:10px">Delete</button></div>
 					  <div class="card-body">
-					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>' || question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>'">
+					    <template v-if="question.type == '<?=Question::TYPE_YESORNO?>' || question.type == '<?=Question::TYPE_OPTION?>' || question.type == '<?=Question::TYPE_EXPANDED_OPTION?>' || question.type == '<?=Question::TYPE_CHECKBOX?>'">
 					    	<h4>{{ question.title }}</h4>
 					    	<canvas :id="question.pk" v-bind:index="index" class="pieChart"></canvas>
 					    </template>
@@ -161,6 +161,17 @@ $questions = $survey->getQuestions();
 					    		<a href="javascript:void(0);" style="clear:left" v-on:click="addNewQuestionChoice()">+ Add Choice</a>
 					    	</div>
 
+					    	<div style="width:90%; margin-left:5%" v-if="newQuestionType == '<?=Question::TYPE_SLIDER?>'">
+					    		<div class="form-group">
+						    		<label>Min Value</label>
+						    		<input type="text" class="form-control" v-model="newQuestionChoices[0]" placeholder="Min Value"><br>
+					    		</div>
+					    		<div class="form-group">
+						    		<label>Max Value</label>
+						    		<input type="text" class="form-control" v-model="newQuestionChoices[1]" placeholder="Max Value"><br>
+					    		</div>
+					    	</div>
+
 					    	<button type="button" class="btn btn-primary float-right" v-on:click="createQuestion()">Create Question >></button>
 					  	</form>
 					  </div>
@@ -224,6 +235,16 @@ $questions = $survey->getQuestions();
 					    		</div>
 					    		<br>
 					    		<a href="javascript:void(0);" style="clear:left" v-on:click="addEditQuestionChoice()">+ Add Choice</a>
+					    	</div>
+					    	<div style="width:90%; margin-left:5%" v-if="tempEditQuestion.type == '<?=Question::TYPE_SLIDER?>'">
+					    		<div class="form-group">
+						    		<label>Min Value</label>
+						    		<input type="text" class="form-control" v-model="tempEditQuestion.choices[0]" placeholder="Min Value"><br>
+					    		</div>
+					    		<div class="form-group">
+						    		<label>Max Value</label>
+						    		<input type="text" class="form-control" v-model="tempEditQuestion.choices[1]" placeholder="Max Value"><br>
+					    		</div>
 					    	</div>
 					  	</form>
 			      </div>
