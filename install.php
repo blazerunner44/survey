@@ -1,11 +1,7 @@
 <?php
+require_once 'class/Model.php';
 if($_POST['submit']){
-	$myfile = fopen("mysql.php", "w") or die("Unable to open file!");
-	$txt = "<?php \$con = mysqli_connect('{$_POST[host]}','{$_POST[user]}','{$_POST[dbPassword]}','{$_POST[dbName]}'); ?>";
-	fwrite($myfile, $txt);
-
-	require('mysql.php');
-
+	$con = Model::getConnection();
 	//Create QUESTIONS table
 	$query="CREATE TABLE questions (
 	id INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -39,7 +35,7 @@ if($_POST['submit']){
 	//Populate settings table
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('name', '$_POST[name]')");
 	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', '$_POST[email]')");
-	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('email', 'Default survey description')");
+	mysqli_query($con, "INSERT INTO settings (name,value) VALUES ('description', 'Default survey description')");
 
 	//Create USERS table
 	$query="CREATE TABLE users (
@@ -87,35 +83,10 @@ if($_POST['submit']){
 			    <input type="password" class="form-control" id="password" name="password" placeholder="Password for admin user">
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-sm-6">
-				<div class="form-group">
-				    <label for="host">Database Host</label>
-				    <input type="text" class="form-control" id="host" name="host" value="localhost" placeholder="Enter the database host address">
-				</div>
-			</div>
-			<div class="col-sm-6">
-				<div class="form-group">
-				    <label for="dbName">Database Name</label>
-				    <input type="text" class="form-control" id="dbName" name="dbName" placeholder="Enter the name of your database">
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-sm-6">
-				<div class="form-group">
-				    <label for="user">Database User</label>
-				    <input type="text" class="form-control" id="user" name="user" placeholder="Enter database user">
-				</div>
-			</div>
-			<div class="col-sm-6">
-				<div class="form-group">
-				    <label for="dbPassword">Database Password</label>
-				    <input type="password" class="form-control" id="dbPassword" name="dbPassword" placeholder="Enter the password of your database">
-				</div>
-			</div>
+		<div class="alert alert-warning">
+			<p><strong>Important!</strong> Please make sure you've supplied your database credentials in the file <code>class/Model.php</code> before continuing.</p>
 		</div>
 		
-		<input type="submit" class="btn btn-default" name="submit"/>
+		<input type="submit" class="btn btn-default" name="submit" value="Continue Install >>" />
 	</div>
 	</form>

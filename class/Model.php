@@ -3,6 +3,15 @@ require_once __DIR__ . '/BuilderContainer.php';
 abstract class Model{
 	public $pk;
 
+	public static function getConnection(){
+		return mysqli_connect(
+			'localhost', //Database server
+			'admin_survey', //Database user
+			'survey', //Database password
+			'admin_survey' //Database name
+		);
+	}
+
 	public static function all(){
 		$columns = self::getArgsList();
 		array_unshift($columns, self::getPkField());
@@ -95,15 +104,6 @@ abstract class Model{
 		}else{
 			throw new Exception("Error executing query: " . $query, 1);
 		}
-	}
-
-	public function getConnection(){
-		return mysqli_connect(
-			'localhost', //Database server
-			'admin_survey', //Database user
-			'survey', //Database password
-			'admin_survey' //Database name
-		);
 	}
 
 	private static function getArgsList($method = '__construct'){

@@ -1,6 +1,5 @@
 <?php 
 session_start();
-require_once '../mysql.php';
 require '../class/Survey.php';
 require '../class/Question.php';
 
@@ -69,10 +68,11 @@ $questions = $survey->getQuestions();
 	</head>
 	<body>
 		<div id="app" class="containter-fluid">
-			<div class="row">
+			<div class="row" style="margin-bottom: 15px;">
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
-					<h1>{{ surveyTitle }} &nbsp; <a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
+					<h1>{{ surveyTitle }}</h1>
+					<a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
 				</div>
 				<div class="col-md-3"></div>
 			</div>
@@ -190,7 +190,7 @@ $questions = $survey->getQuestions();
 						<form action="updateSettings.php" method="POST">
 							<input name="name" class="form-control" placeholder="Survey Name" value="<?= $survey->name; ?>"/>
 							<input name="email" class="form-control" placeholder="Survey Email" value="<?= $survey->email; ?>" />
-							<textarea name="description" class="form-control" placeholder="Survey Description" rows="10"><?= $survey->description; ?></textarea>
+							<textarea name="description" class="form-control" placeholder="Survey Description" rows="10"><?php echo str_replace('<br />', '', $survey->description); ?></textarea>
 							<button type="submit" class="btn btn-primary" style="float:right"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
 						</form>
 					</div>
@@ -263,8 +263,6 @@ $questions = $survey->getQuestions();
         		pageKey: 0,
         		questions: <?php echo json_encode($questions); ?>,
         		surveyTitle: "<?= $survey->name ?>",
-        		surveyDescription: "<?= $survey->description ?>",
-        		surveyEmail: "<?= $survey->email ?>",
         		newQuestionTitle: '',
         		newQuestionDescription: '',
         		newQuestionType: '<?=Question::TYPE_YESORNO?>',

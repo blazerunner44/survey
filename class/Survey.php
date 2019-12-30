@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/Model.php';
 class Survey {
 	public $name;
     public $email;
@@ -7,7 +8,7 @@ class Survey {
 	private $questions = array();
 	
 	public function __construct() {
-		$con = mysqli_connect('localhost','admin_survey','survey','admin_survey');
+		$con = Model::getConnection();
 		$sql = mysqli_query($con, "SELECT * FROM settings");
 		while($row = mysqli_fetch_assoc($sql)){
 			$this->{$row['name']} = $row['value'];
@@ -16,7 +17,7 @@ class Survey {
 	}
 
 	public static function verifyUser($username, $password){
-		$con = mysqli_connect('localhost','admin_survey','survey','admin_survey');
+		$con = Model::getConnection();
 		$escapedUsername = self::escapeInput($username); //Escape username for database query
 		$row = mysqli_query($con, "SELECT username, password FROM users WHERE username='$escapedUsername'");
 		$row = mysqli_fetch_array($row);
@@ -46,11 +47,21 @@ class Survey {
 		}
 	}
 	public function updateValue($valueName, $value){
+		$con = Model::getConnection();
 		$this->$valueName = $value;
 		mysqli_query($con, "UPDATE settings SET value='$value' WHERE name='$valueName'");
 	}
 	public function getQuestions(){
 		return Question::all()->get();
+	}
+	public function isInstalled(){
+		$con = Model::getConnection();
+		$result = mysqli_query($con, "SHOW TABLES LIKE 'settings'");
+		if(mysqli_num_rows($result) > 0){
+			return True;
+		}else{
+			return False;
+		}
 	}
 }
 ?>

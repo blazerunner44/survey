@@ -3,8 +3,12 @@ require_once 'class/Question.php';
 require_once 'class/Response.php';
 require_once 'class/Survey.php';
 
-require_once('mysql.php');
 $survey = new Survey();
+
+if(!$survey->isInstalled()){
+  header('Location: install.php');
+}
+
 $questions = Question::all();
 $questions = $survey->getQuestions();
 
@@ -32,7 +36,7 @@ label {
 	margin-top: 10px;
 }
 .container p {
-	margin-top: 20px;
+	margin-bottom: 50px;
 }
 .form-check-label{
   font-size: 12pt;
@@ -46,10 +50,8 @@ label {
 
 
 <div class="container">
-	<div class="row">
-    <h1><?php echo $survey->name; ?></h1>
-	  <p><?php echo $survey->description; ?></p>
-	  <hr>
+    <h1><?= $survey->name ?></h1>
+	  <p><?= $survey->description; ?></p>
     <?php
 		if (!empty($_POST)) {
 			
@@ -88,15 +90,17 @@ label {
 		  exit;
     }
 		?>
-    </div>
     
     <form method="post" action="">
       <?php
+      if(empty($questions)){
+        echo '<div class="alert alert-secondary"><strong>No questions!</strong> No questions have been configured. Please setup your survey <a href="admin/">here!</a></p></div>';
+      }
       foreach($questions as $question){
         echo $question->getHTML();
       }
       ?>
-    <button type="submit" id="submit" class='btn btn-success'>Submit</button>
+    <button type="submit" id="submit" style="margin:25px 0;" class='btn btn-success'>Submit</button>
     </form>
 </div>
 </body>
