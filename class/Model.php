@@ -4,12 +4,8 @@ abstract class Model{
 	public $pk;
 
 	public static function getConnection(){
-		return mysqli_connect(
-			'localhost', //Database server
-			'admin_survey', //Database user
-			'survey', //Database password
-			'admin_survey' //Database name
-		);
+		require_once __DIR__ . '/Connection.php';
+		return connect();
 	}
 
 	public static function all(){

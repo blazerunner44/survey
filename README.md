@@ -33,10 +33,10 @@ While multiple user support isn't a feature yet, it is on the list of things to 
 
 
 # Installation
-1. First, modify the `getConnection()` function inside `class/Model.php` to contain your database credentials.
+1. First, modify the `connect()` function inside `class/Connection.php` to contain your database credentials.
  ex. 
  ```
- public static function getConnection(){
+ function connect(){
 		 return mysqli_connect(
 			 'localhost', //Database server
 			 'db_user', //Database user
