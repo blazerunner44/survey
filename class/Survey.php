@@ -52,7 +52,7 @@ class Survey {
 		mysqli_query($con, "UPDATE settings SET value='$value' WHERE name='$valueName'");
 	}
 	public function getQuestions(){
-		return Question::all()->get();
+		return Question::all()->orderBy('pos', 'asc')->get();
 	}
 	public function isInstalled(){
 		$con = Model::getConnection();

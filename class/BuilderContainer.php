@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
+use NilPortugues\Sql\QueryBuilder\Syntax\OrderBy;
 use NilPortugues\Sql\QueryBuilder\Builder\GenericBuilder;
 class BuilderContainer{
 	private $builder;
@@ -86,6 +87,17 @@ class BuilderContainer{
 
 	public function end(){
 		$this->query->end();
+		return $this;
+	}
+
+	public function orderBy($column, $direction){
+		if($direction == 'desc'){
+			$this->query->orderBy($column, OrderBy::DESC);
+		}
+		if($direction == 'asc'){
+			$this->query->orderBy($column, OrderBy::ASC);
+		}
+		
 		return $this;
 	}
 }
