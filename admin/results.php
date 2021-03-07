@@ -72,7 +72,7 @@ $questions = $survey->getQuestions();
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
 					<h1>{{ surveyTitle }}</h1>
-					<a href="../index.php" target="_blank">View Survey</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
+					<a href="../index.php" target="_blank">View Survey</a><a href="export.php" style="margin-left:15px">Download Results</a><a href="logout.php" style="float:right;">Logout</a><a href="#settings" style="float:right;margin-right:50px;" onclick="$('#settings').show();$('html').css('overflow', 'hidden');">Settings</a></h1>
 				</div>
 				<div class="col-md-3"></div>
 			</div>

@@ -82,7 +82,9 @@ class Question extends Model{
 			         <label for='{$this->pk}'><h4>{$this->title}<small> {$this->description}</small></h4></label>
 
 			        <select name='{$this->pk}' " . ($this->type == self::TYPE_EXPANDED_OPTION ? 'multiple' : '') . " class='form-control'>";
-
+			        	if($this->type == self::TYPE_OPTION){
+			        		$return .= '<option selected disabled value="No selection">Please select an option</option>';
+			        	}
 			          foreach($this->choices as $choice){
 			            $return .= "<option>{$choice}</option>";
 			          }

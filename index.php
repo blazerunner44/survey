@@ -20,6 +20,7 @@ $questions = $survey->getQuestions();
 
 <title><?php echo $survey->name; ?></title>
 <meta name="description" content="We would love to hear your feedback!">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <!-- Needed for slider -->
 <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
@@ -42,6 +43,9 @@ label {
   font-size: 12pt;
   margin-top: -10px;
 }
+.form-check{
+  margin-bottom: 20px;
+}
 </style>
 </head>
 
@@ -52,6 +56,7 @@ label {
 <div class="container">
     <h1><?= $survey->name ?></h1>
 	  <p><?= $survey->description; ?></p>
+    <hr>
     <?php
 		if (!empty($_POST)) {
 			
@@ -97,10 +102,10 @@ label {
         echo '<div class="alert alert-secondary"><strong>No questions!</strong> No questions have been configured. Please setup your survey <a href="admin/">here!</a></p></div>';
       }
       foreach($questions as $question){
-        echo $question->getHTML();
+        echo '<div style="margin: 50px 0px;">' . $question->getHTML() . '</div>';
       }
       ?>
-    <button type="submit" id="submit" style="margin:25px 0;" class='btn btn-success'>Submit</button>
+      <button type="submit" id="submit" style="margin:25px 0;" class='btn btn-success'>Submit Survey</button>
     </form>
 </div>
 </body>
